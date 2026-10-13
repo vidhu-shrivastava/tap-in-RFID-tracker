@@ -3,22 +3,99 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tap-In — Home</title>
-    <!-- Tailwind CSS via CDN (required stack — do not replace with a build step) -->
+    <meta
+      name="description"
+      content="Sign in to the Tap-In Attendance Tracker."
+    />
+    <title>Sign In | Tap-In Attendance Tracker</title>
+    <!-- Load Tailwind CSS from its CDN for the page's responsive styling. -->
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Owner branch: branch-member-ui — placeholder so Git tracks this file -->
-    <main class="mx-auto max-w-lg px-6 py-16">
-      <h1 class="text-3xl font-bold tracking-tight">Tap-In</h1>
-      <p class="mt-2 text-slate-600">
-        RFID attendance tracker — member landing page placeholder.
-      </p>
-      <nav class="mt-8 flex flex-col gap-2 text-sm">
-        <a class="text-sky-700 underline" href="dashboard.html">Member dashboard</a>
-        <a class="text-sky-700 underline" href="register.html">Register card</a>
-        <a class="text-sky-700 underline" href="admin.html">Admin</a>
-      </nav>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <!-- Center the sign-in card in the available screen space. -->
+    <main class="flex min-h-screen items-center justify-center px-4 py-10">
+      <!-- Keep the sign-in content together in one accessible card. -->
+      <section
+        aria-labelledby="page-title"
+        class="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg shadow-slate-200/70 sm:p-9"
+      >
+        <header class="mb-8 text-center">
+          <div
+            aria-hidden="true"
+            class="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-teal-700 text-xl font-bold text-white"
+          >
+            T
+          </div>
+          <h1 id="page-title" class="text-2xl font-bold tracking-tight sm:text-3xl">
+            Tap-In Attendance Tracker
+          </h1>
+          <p class="mt-2 text-sm text-slate-600">
+            Sign in to continue to your account.
+          </p>
+        </header>
+
+        <!-- Collect the member's email and show the primary sign-in action. -->
+        <div class="space-y-5">
+          <div>
+            <label for="email" class="mb-2 block text-sm font-medium text-slate-700">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              class="block w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20"
+            />
+          </div>
+          <button
+            type="button"
+            class="w-full rounded-lg bg-teal-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2"
+          >
+            Sign In
+          </button>
+        </div>
+
+        <!-- Separate the email option from the alternative Google sign-in action. -->
+        <div class="my-6 flex items-center gap-4" aria-hidden="true">
+          <div class="h-px flex-1 bg-slate-200"></div>
+          <span class="text-xs font-medium uppercase tracking-wider text-slate-500">
+            Or
+          </span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+
+        <button
+          type="button"
+          class="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2"
+        >
+          <svg
+            aria-hidden="true"
+            class="h-5 w-5"
+            viewBox="0 0 48 48"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="#EA4335"
+              d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"
+            />
+            <path
+              fill="#4285F4"
+              d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.62 5.91c4.45-4.11 7.14-10.16 7.14-17.56Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M10.53 28.59A14.38 14.38 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"
+            />
+            <path
+              fill="#34A853"
+              d="M24 48c6.48 0 11.93-2.13 15.9-5.89l-7.62-5.91c-2.13 1.43-4.86 2.3-8.28 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
+            />
+          </svg>
+          Sign in with Google
+        </button>
+      </section>
     </main>
   </body>
 </html>
