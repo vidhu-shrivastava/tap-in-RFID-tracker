@@ -33,6 +33,7 @@
 <!-- AI: append new bullets below. Do not delete older entries. -->
 
 - **2026-10-12 22:53** — Files: `frontend/index.html`. Built: a responsive sign-in card with the app title, accessible email field, Sign In button, and Google sign-in button. How it works: Tailwind CDN utility classes center and style the semantic HTML elements responsively; button actions are presentation-only and are not connected to authentication.
+- **2026-10-12 23:10** — Files: `frontend/index.html`. Built: a labeled password input on the sign-in card. How it works: a native password input masks typed characters and uses `autocomplete="current-password"`; Tailwind classes match the email field's responsive appearance.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 
