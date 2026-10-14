@@ -5,22 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tap-In — Exec Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN available when you build analytics on your branch -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Owner branch: branch-admin-analytics — placeholder so Git tracks this file -->
-    <main class="mx-auto max-w-4xl px-6 py-16">
-      <h1 class="text-3xl font-bold tracking-tight">Exec Admin Dashboard</h1>
-      <p class="mt-2 text-slate-600">
-        Placeholder — events, attendance analytics, and Chart.js / Retool views go here.
-      </p>
-      <div class="mt-8 rounded border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-        Chart / analytics area
-      </div>
-      <p class="mt-6 text-sm">
-        <a class="text-sky-700 underline" href="index.html">← Back home</a>
-      </p>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <header class="mb-8 border-b border-slate-300 pb-6">
+        <a class="text-sm font-medium text-sky-800 underline" href="index.html">Back to Tap-In</a>
+        <p class="mt-6 text-sm font-semibold uppercase tracking-wide text-teal-800">Executive Board</p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Exec Admin Dashboard</h1>
+        <p class="mt-2 max-w-2xl text-slate-600">Manage event details and review sample attendance at a glance.</p>
+      </header>
+
+      <section aria-labelledby="event-manager-heading" class="border-b border-slate-300 pb-8">
+        <div class="mb-5">
+          <h2 id="event-manager-heading" class="text-xl font-bold">Event Manager</h2>
+          <p class="mt-1 text-sm text-slate-600">Create an event preview. This form does not save to a database.</p>
+        </div>
+
+        <form id="eventForm" class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label for="eventName" class="mb-1 block text-sm font-medium">Event name</label>
+            <input id="eventName" name="eventName" type="text" required
+              class="w-full rounded border border-slate-400 bg-white px-3 py-2 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20" />
+          </div>
+          <div>
+            <label for="eventDate" class="mb-1 block text-sm font-medium">Date</label>
+            <input id="eventDate" name="eventDate" type="date" required
+              class="w-full rounded border border-slate-400 bg-white px-3 py-2 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20" />
+          </div>
+          <div>
+            <label for="pointValue" class="mb-1 block text-sm font-medium">Point value</label>
+            <input id="pointValue" name="pointValue" type="number" min="0" step="1" required
+              class="w-full rounded border border-slate-400 bg-white px-3 py-2 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20" />
+          </div>
+          <div class="flex items-center gap-3 self-end pb-2">
+            <input id="eventActive" name="eventActive" type="checkbox"
+              class="h-4 w-4 accent-teal-700" />
+            <label for="eventActive" class="text-sm font-medium">Event is active</label>
+          </div>
+          <div class="flex flex-col items-start gap-3 sm:col-span-2 sm:flex-row sm:items-center">
+            <button type="submit"
+              class="rounded bg-sky-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-800 active:opacity-80">
+              Preview event
+            </button>
+            <p id="formMessage" class="text-sm text-slate-600" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+
+      <section aria-labelledby="attendance-heading" class="pt-8">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="attendance-heading" class="text-xl font-bold">Attendance by event</h2>
+            <p class="mt-1 text-sm text-slate-600">Sample check-in counts for the Week 1 layout.</p>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sample data</span>
+        </div>
+        <div class="h-72 w-full sm:h-80">
+          <canvas id="attendanceChart" role="img" aria-label="Bar chart showing sample attendance counts by event"></canvas>
+        </div>
+      </section>
     </main>
+
+    <script>
+      // Keep Week 1 form behavior local; no event is sent to Supabase.
+      document.getElementById("eventForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        document.getElementById("formMessage").textContent =
+          "Preview only: this event was not saved.";
+      });
+
+      // Chart.js turns the sample event names and check-in counts into a bar chart.
+      const attendanceChart = document.getElementById("attendanceChart");
+      new Chart(attendanceChart, {
+        type: "bar",
+        data: {
+          labels: ["Welcome Mixer", "Community Night", "Study Jam", "Spring Social"],
+          datasets: [{
+            label: "Attendance",
+            data: [42, 28, 36, 54],
+            backgroundColor: ["#0f766e", "#0369a1", "#65a30d", "#c2410c"],
+            borderRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 },
+              title: { display: true, text: "Check-ins" }
+            }
+          }
+        }
+      });
+    </script>
   </body>
 </html>

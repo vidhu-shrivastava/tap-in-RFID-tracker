@@ -34,29 +34,29 @@ Check items off as you go.
 
 ### Setup HTML with Tailwind + Chart.js CDNs
 
-- [ ] Keep / add HTML boilerplate (`DOCTYPE`, charset, viewport, title)
-- [ ] Include **Tailwind CSS via CDN**: `<script src="https://cdn.tailwindcss.com"></script>`
-- [ ] Uncomment / add **Chart.js via CDN**: `<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>`
-- [ ] Use a clean page layout (title like “Exec Admin Dashboard” + short subtitle)
+- [x] Keep / add HTML boilerplate (`DOCTYPE`, charset, viewport, title)
+- [x] Include **Tailwind CSS via CDN**: `<script src="https://cdn.tailwindcss.com"></script>`
+- [x] Uncomment / add **Chart.js via CDN**: `<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>`
+- [x] Use a clean page layout (title like “Exec Admin Dashboard” + short subtitle)
 
 ### Top section — Event Manager form
 
-- [ ] Add a clear “Event Manager” heading
+- [x] Add a clear “Event Manager” heading
 - [ ] Build a form with fields for:
-  - [ ] **Name** (event name)
-  - [ ] **Date**
-  - [ ] **Point Value**
-  - [ ] **Active** toggle (checkbox or switch-style control)
-- [ ] Add a Submit / Save button
-- [ ] For Week 1: `preventDefault` on submit is OK — **static form only** (no live DB write yet)
+  - [x] **Name** (event name)
+  - [x] **Date**
+  - [x] **Point Value**
+  - [x] **Active** toggle (checkbox or switch-style control)
+- [x] Add a Submit / Save button
+- [x] For Week 1: `preventDefault` on submit is OK — **static form only** (no live DB write yet)
 
 ### Bottom section — Chart.js bar chart
 
-- [ ] Add a `<canvas>` element for the chart (give it an `id`, e.g. `attendanceChart`)
-- [ ] Write a small Vanilla JS script that initializes a **Chart.js bar chart**
-- [ ] Feed it **dummy attendance data** (e.g. labels = event names, values = attendance counts)
-- [ ] Confirm the chart renders when you open `frontend/admin.html` in a browser
-- [ ] Quick mobile-width check so the canvas doesn’t overflow awkwardly
+- [x] Add a `<canvas>` element for the chart (give it an `id`, e.g. `attendanceChart`)
+- [x] Write a small Vanilla JS script that initializes a **Chart.js bar chart**
+- [x] Feed it **dummy attendance data** (e.g. labels = event names, values = attendance counts)
+- [x] Confirm the chart renders when you open `frontend/admin.html` in a browser
+- [x] Quick mobile-width check so the canvas doesn’t overflow awkwardly
 
 ---
 
