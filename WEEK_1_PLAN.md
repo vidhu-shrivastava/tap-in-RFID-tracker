@@ -35,27 +35,27 @@ Check items off as you go.
 
 ### `database/rpc_handle_scan.sql` — `handle_rfid_scan(scanned_uid TEXT)`
 
-- [ ] Create `database/rpc_handle_scan.sql` if missing
-- [ ] Define a PostgreSQL function: **`handle_rfid_scan(scanned_uid TEXT)`**
-- [ ] **Look up `member_id`** from `members` where `rfid_uid` matches `scanned_uid`
-- [ ] **Find active `event_id`** from `events` where `is_active = true` (decide clear behavior if none / more than one)
-- [ ] **Check for duplicate logs** — same member + same event already in `attendance_logs` (reject / no-op / return a clear status)
-- [ ] **INSERT** into `attendance_logs` (`member_id`, `event_id`, `scanned_at`)
-- [ ] **Increment** `members.total_points` by the active event’s `point_value`
-- [ ] Return a useful result (e.g. success/error reason, updated points) so hardware / frontend can react
-- [ ] Comment the function heavily so teammates can follow the scan path
+- [x] Create `database/rpc_handle_scan.sql` if missing
+- [x] Define a PostgreSQL function: **`handle_rfid_scan(scanned_uid TEXT)`**
+- [x] **Look up `member_id`** from `members` where `rfid_uid` matches `scanned_uid`
+- [x] **Find active `event_id`** from `events` where `is_active = true` (decide clear behavior if none / more than one)
+- [x] **Check for duplicate logs** — same member + same event already in `attendance_logs` (reject / no-op / return a clear status)
+- [x] **INSERT** into `attendance_logs` (`member_id`, `event_id`, `scanned_at`)
+- [x] **Increment** `members.total_points` by the active event’s `point_value`
+- [x] Return a useful result (e.g. success/error reason, updated points) so hardware / frontend can react
+- [x] Comment the function heavily so teammates can follow the scan path
 
 ### `frontend/js/supabase.js` — client init boilerplate
 
-- [ ] Replace the placeholder with Supabase client init boilerplate
-- [ ] Use URL + anon key placeholders (or env-style constants) — **do not commit real secrets**
-- [ ] Export a shared `supabase` client / helpers other pages can use
-- [ ] Keep it simple: CDN-compatible Vanilla JS patterns per `AI_CODING_SKILLS.md`
-- [ ] Leave a short comment on how HTML pages should load / import this file
+- [x] Replace the placeholder with Supabase client init boilerplate
+- [x] Use URL + anon key placeholders (or env-style constants) — **do not commit real secrets**
+- [x] Export a shared `supabase` client / helpers other pages can use
+- [x] Keep it simple: CDN-compatible Vanilla JS patterns per `AI_CODING_SKILLS.md`
+- [x] Leave a short comment on how HTML pages should load / import this file
 
 ### Smoke check
 
-- [ ] Mentally / on paper walk one scan: unknown UID → registered UID → duplicate tap
+- [x] Mentally / on paper walk one scan: unknown UID → registered UID → duplicate tap
 - [ ] Confirm JS file loads without syntax errors in the browser console (even if URL/key are still placeholders)
 
 ---
@@ -104,9 +104,9 @@ Confirm `*` is on **`backend-core`** before you push. Never push to `main`.
 
 ### Progress log
 
-- [ ] Append a **timestamped** entry in **`docs/progress/backend-core.md`**
-- [ ] Include: files touched, what you built, and a one-line “how it works”
-- [ ] Do **not** edit `docs/PROGRESS_TRACKER.md` (index only)
+- [x] Append a **timestamped** entry in **`docs/progress/backend-core.md`**
+- [x] Include: files touched, what you built, and a one-line “how it works”
+- [x] Do **not** edit `docs/PROGRESS_TRACKER.md` (index only)
 
 Example log bullet:
 

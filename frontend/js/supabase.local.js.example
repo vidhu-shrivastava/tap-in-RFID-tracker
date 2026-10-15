@@ -1,0 +1,10 @@
+/**
+ * Copy this file to:  frontend/js/supabase.local.js
+ * Then paste your real Project URL + anon key from Supabase → Project Settings → API.
+ *
+ * supabase.local.js is gitignored — do NOT rename this example to remove .example
+ * and commit real keys.
+ */
+
+export const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
+export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";

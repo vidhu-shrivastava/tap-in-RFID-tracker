@@ -1,30 +1,37 @@
 -- Tap-In RFID Attendance Tracker — Supabase PostgreSQL Schema
 -- Owner branch: branch-db-onboarding
--- Placeholder so Git tracks the database/ folder.
--- Expand this file with CREATE TABLE / policies / indexes on your branch.
+-- Paste this whole file into the Supabase SQL Editor (run once on a fresh project).
 
 -- members: people who tap in with RFID cards
--- CREATE TABLE members (
---   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
---   full_name text NOT NULL,
---   email text UNIQUE NOT NULL,
---   rfid_uid text UNIQUE NOT NULL,
---   total_points int4 NOT NULL DEFAULT 0
--- );
+CREATE TABLE members (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name text NOT NULL,
+  email text UNIQUE NOT NULL,
+  rfid_uid text UNIQUE NOT NULL,
+  total_points int4 NOT NULL DEFAULT 0
+);
 
 -- events: meetings / activities that award points
--- CREATE TABLE events (
---   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
---   event_name text NOT NULL,
---   event_date date NOT NULL,
---   point_value int4 NOT NULL,
---   is_active boolean NOT NULL DEFAULT false
--- );
+CREATE TABLE events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_name text NOT NULL,
+  event_date date NOT NULL,
+  point_value int4 NOT NULL,
+  is_active boolean NOT NULL DEFAULT false
+);
 
 -- attendance_logs: one row per successful tap
--- CREATE TABLE attendance_logs (
---   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
---   member_id uuid NOT NULL REFERENCES members(id),
---   event_id uuid NOT NULL REFERENCES events(id),
---   scanned_at timestamptz NOT NULL DEFAULT now()
--- );
+CREATE TABLE attendance_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  member_id uuid NOT NULL REFERENCES members(id),
+  event_id uuid NOT NULL REFERENCES events(id),
+  scanned_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- FK indexes (faster lookups + joins)
+CREATE INDEX attendance_logs_member_id_idx ON attendance_logs (member_id);
+CREATE INDEX attendance_logs_event_id_idx ON attendance_logs (event_id);
+
+-- One check-in per member per event (blocks double-taps at the DB level too)
+CREATE UNIQUE INDEX attendance_logs_member_event_uidx
+  ON attendance_logs (member_id, event_id);

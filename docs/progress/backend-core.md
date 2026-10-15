@@ -32,7 +32,9 @@
 
 <!-- AI: append new bullets below. Do not delete older entries. -->
 
-- *(No AI entries yet — first work session will add the first timestamped bullet here.)*
+- **2026-10-15 12:25** — Files: `database/rpc_handle_scan.sql` (created), `frontend/js/supabase.js`.
+  Built: `handle_rfid_scan(scanned_uid TEXT)` RPC (member lookup → exactly-one active event → duplicate guard → `attendance_logs` insert → `total_points` increment + JSONB status payload) and shared Supabase JS client init + `handleRfidScan` helper (CDN ESM, URL/anon placeholders only).
+  How it works: hardware/frontend call one DB function as the scan entrypoint; pages `import { supabase, handleRfidScan } from "./js/supabase.js"` instead of duplicating `createClient`.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 
