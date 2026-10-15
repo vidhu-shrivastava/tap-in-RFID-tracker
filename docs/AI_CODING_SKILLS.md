@@ -35,7 +35,9 @@
 │       ├── db-onboarding.md
 │       └── admin-analytics.md
 ├── database/
-│   └── schema.sql                 # Supabase PostgreSQL schema
+│   ├── README.md                  # Who owns which SQL file (do not delete siblings)
+│   ├── schema.sql                 # Tables — branch-db-onboarding
+│   └── rpc_handle_scan.sql        # Scan RPC — branch-backend-core (do not delete)
 ├── frontend/
 │   ├── index.html                 # Member landing / login entry
 │   ├── dashboard.html             # Member dashboard
@@ -52,10 +54,10 @@
 
 | Branch | Role | Files |
 |--------|------|-------|
-| `branch-backend-core` | Vidhu | `frontend/js/supabase.js`, shared docs guides, `docs/progress/backend-core.md`, backend logic |
+| `branch-backend-core` | Vidhu | `frontend/js/supabase.js`, `database/rpc_handle_scan.sql`, shared docs guides, `docs/progress/backend-core.md`, backend logic |
 | `branch-hardware` | Kathleen | `/hardware/`, `docs/progress/hardware.md` |
 | `branch-member-ui` | Turner | `frontend/index.html`, `frontend/dashboard.html`, `docs/progress/member-ui.md` |
-| `branch-db-onboarding` | Jayati/Kailash | `/database/schema.sql`, `frontend/register.html`, `docs/progress/db-onboarding.md` |
+| `branch-db-onboarding` | Jayati/Kailash | `database/schema.sql` only (do **not** delete other `/database/` files), `frontend/register.html`, `docs/progress/db-onboarding.md` |
 | `branch-admin-analytics` | Jayati/Kailash | `frontend/admin.html`, `docs/progress/admin-analytics.md` |
 
 **Merge-safe rule:** Each person edits only their code paths + their own `docs/progress/<file>.md`. Shared guides and `docs/PROGRESS_TRACKER.md` (index) are Team Lead–owned so parallel branches do not conflict.

@@ -1,5 +1,13 @@
 -- Tap-In RFID Attendance Tracker — Supabase PostgreSQL Schema
--- Owner branch: branch-db-onboarding
+-- Owner branch: branch-db-onboarding (Jayati edit THIS file)
+--
+-- !!! MERGE-SAFE RULE FOR EVERYONE IN /database/ !!!
+-- - Edit ONLY the file(s) your branch owns.
+-- - Do NOT delete, rename, or empty OTHER files in this folder
+--   (especially database/rpc_handle_scan.sql — owned by branch-backend-core / Vidhu).
+-- - Deleting a sibling file on your branch causes messy merge conflicts into main.
+-- - If you need a change in someone else's SQL file, ask the owner or the Team Lead.
+--
 -- Paste this whole file into the Supabase SQL Editor (run once on a fresh project).
 
 -- members: people who tap in with RFID cards

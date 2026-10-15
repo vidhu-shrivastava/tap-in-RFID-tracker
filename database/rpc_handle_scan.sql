@@ -1,5 +1,11 @@
 -- Tap-In RFID Attendance Tracker — Scan RPC
--- Owner branch: branch-backend-core
+-- Owner branch: branch-backend-core (Vidhu)
+--
+-- !!! DO NOT DELETE THIS FILE !!!
+-- Other branches (esp. db-onboarding) may edit database/schema.sql only.
+-- Never remove, rename, or blank this file while working on schema/register —
+-- that causes merge conflicts and breaks the RFID scan entrypoint.
+-- If schema column names change, ask backend-core to update this RPC — do not delete it.
 --
 -- Run this in the Supabase SQL Editor AFTER members / events / attendance_logs exist
 -- (see database/schema.sql on the db-onboarding branch).

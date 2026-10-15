@@ -36,6 +36,10 @@
   Built: `handle_rfid_scan(scanned_uid TEXT)` RPC (member lookup → exactly-one active event → duplicate guard → `attendance_logs` insert → `total_points` increment + JSONB status payload) and shared Supabase JS client init + `handleRfidScan` helper (CDN ESM, URL/anon placeholders only).
   How it works: hardware/frontend call one DB function as the scan entrypoint; pages `import { supabase, handleRfidScan } from "./js/supabase.js"` instead of duplicating `createClient`.
 
+- **2026-10-15 13:58** — Files: `database/schema.sql`, `.gitignore` (created), `frontend/js/supabase.local.js.example` (created), `frontend/js/supabase.js`, `docs/progress/backend-core.md`.
+  Built: live Supabase tables from schema; deployed + smoke-tested `handle_rfid_scan` (`checked_in` then `already_checked_in`); public-repo secret pattern — keys live only in gitignored `supabase.local.js`, tracked `supabase.js` imports that file and keeps placeholders out of Git.
+  How it works: teammates copy the `.example` → local keys file; browser loads `supabase.js` which pulls URL/anon from the ignored local module so the public GitHub repo never gets project credentials.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->
