@@ -14,6 +14,12 @@
 # Local Supabase key overrides (copy from the .example file)
 frontend/js/supabase.local.js
 
+# Local admin gate password (copy from admin.local.js.example)
+frontend/js/admin.local.js
+
+# Backend receive env (copy from backend/.env.example)
+backend/.env
+
 # Catch-all folders people sometimes dump keys into
 secrets/
 *.pem
@@ -95,3 +101,9 @@ supabase/.branches/
 # Per-person Week 1 plans (do not merge onto main)
 # -----------------------------------------------------------------------------
 WEEK_1_PLAN.md
+
+# -----------------------------------------------------------------------------
+# Local scratch / merge artifacts (never commit)
+# -----------------------------------------------------------------------------
+.extracted_from_transcript/
+.extract_transcript_html.py

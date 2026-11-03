@@ -3,20 +3,124 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tap-In — Card Registration</title>
+    <meta
+      name="description"
+      content="Register a member and link an RFID card UID in Tap-IN."
+    />
+    <title>Card Registration | Tap-IN</title>
+    <!-- Tailwind via CDN only — no build tools (team stack rule). -->
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="min-h-screen bg-slate-100 text-slate-900">
-    <main class="mx-auto max-w-xl px-5 py-12 sm:px-8 sm:py-16">
-      <a class="text-sm font-semibold text-teal-800 underline decoration-teal-300 underline-offset-4" href="index.html">Back home</a>
-      <section class="mt-8 border-t-4 border-teal-700 bg-white p-6 shadow-sm sm:p-8">
-        <p class="text-sm font-semibold uppercase tracking-wide text-teal-800">Tap-In Member Setup</p>
-        <h1 class="mt-2 text-3xl font-bold tracking-tight">Register an RFID card</h1>
-        <p class="mt-3 text-slate-600">Enter the member details and the hexadecimal UID printed by your card reader.</p>
+    <script>
+      // Match member pages: class-based dark mode + saved preference.
+      tailwind.config = { darkMode: "class" };
 
-        <form id="registration-form" class="mt-8 space-y-5">
+      try {
+        if (localStorage.getItem("tapInTheme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (error) {
+        console.error("Could not load the display theme preference.", error);
+      }
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-green-100 via-emerald-50 to-teal-100 text-slate-900 dark:bg-slate-950 dark:bg-none dark:text-slate-100"
+  >
+    <!-- Simple top bar with Tap-IN logo (same mark as dashboard / profile). -->
+    <header
+      class="border-b border-emerald-200 bg-white/90 shadow-sm shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:shadow-[0_1px_14px_rgba(16,185,129,0.12)]"
+    >
+      <nav
+        aria-label="Main navigation"
+        class="mx-auto flex max-w-xl items-center justify-between px-4 py-4 sm:px-6"
+      >
+        <a
+          href="index.html"
+          class="flex items-center gap-2 text-lg font-bold tracking-tight text-emerald-900 dark:text-teal-300"
+        >
+          <!-- Rounded-square T + RFID signal arcs logo -->
+          <svg
+            aria-hidden="true"
+            class="h-8 w-8 text-emerald-700 dark:text-emerald-400"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="4"
+              y="4"
+              width="40"
+              height="40"
+              rx="12"
+              stroke="currentColor"
+              stroke-width="2.5"
+            />
+            <path
+              d="M13 16h18M22 16v19"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <path
+              d="M31 21c2.5 2 2.5 6 0 8M35 17c5 4 5 12 0 16"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>Tap-IN</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="theme-toggle"
+            type="button"
+            class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-200"
+          >
+            Switch to dark mode
+          </button>
+          <a
+            href="index.html"
+            class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          >
+            Back home
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-12">
+      <section
+        aria-labelledby="register-heading"
+        class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-lg shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:ring-1 dark:ring-emerald-500/30 dark:shadow-[0_0_22px_rgba(16,185,129,0.12)] sm:p-8"
+      >
+        <div class="mb-8">
+          <p
+            class="text-sm font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300"
+          >
+            Tap-IN Member Setup
+          </p>
+          <h1
+            id="register-heading"
+            class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            Register an RFID card
+          </h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Enter the member details and the hexadecimal UID printed by your
+            card reader.
+          </p>
+        </div>
+
+        <!-- Week 1: static form UI only — same fields as before (name, email, RFID). -->
+        <form id="registration-form" class="space-y-5" novalidate>
           <div>
-            <label class="block text-sm font-semibold" for="full_name">Full name</label>
+            <label
+              class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              for="full_name"
+            >
+              Full name
+            </label>
             <input
               id="full_name"
               name="full_name"
@@ -24,13 +128,23 @@
               autocomplete="name"
               maxlength="120"
               required
-              class="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
               placeholder="Jane Doe"
             />
+            <p
+              id="full_name-error"
+              class="mt-2 hidden text-sm text-rose-700 dark:text-rose-300"
+              role="alert"
+            ></p>
           </div>
 
           <div>
-            <label class="block text-sm font-semibold" for="email">Email</label>
+            <label
+              class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              for="email"
+            >
+              Email
+            </label>
             <input
               id="email"
               name="email"
@@ -38,13 +152,23 @@
               autocomplete="email"
               maxlength="254"
               required
-              class="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
               placeholder="jane@school.edu"
             />
+            <p
+              id="email-error"
+              class="mt-2 hidden text-sm text-rose-700 dark:text-rose-300"
+              role="alert"
+            ></p>
           </div>
 
           <div>
-            <label class="block text-sm font-semibold" for="rfid_uid">RFID hex string</label>
+            <label
+              class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              for="rfid_uid"
+            >
+              RFID hex string
+            </label>
             <input
               id="rfid_uid"
               name="rfid_uid"
@@ -54,32 +178,119 @@
               pattern="[A-Fa-f0-9]+"
               title="Enter the card UID using hexadecimal characters (0-9 and A-F)."
               required
-              class="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 font-mono uppercase focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+              class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 font-mono text-sm uppercase text-slate-900 outline-none placeholder:normal-case placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
               placeholder="A1B2C3D4"
             />
+            <p
+              id="rfid_uid-error"
+              class="mt-2 hidden text-sm text-rose-700 dark:text-rose-300"
+              role="alert"
+            ></p>
           </div>
 
           <button
             type="submit"
-            class="w-full rounded bg-teal-800 px-4 py-3 font-semibold text-white transition hover:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 sm:w-auto"
+            class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900 sm:w-auto"
           >
             Submit registration
           </button>
         </form>
 
-        <!-- Week 1 is a static form: this message confirms the demo only, not a database write. -->
-        <p id="form-status" class="mt-5 min-h-6 text-sm text-slate-700" role="status" aria-live="polite"></p>
+        <!-- Demo-only status: confirms validation, not a database write. -->
+        <p
+          id="form-status"
+          class="mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300"
+          role="status"
+          aria-live="polite"
+        ></p>
       </section>
     </main>
 
     <script>
       const registrationForm = document.querySelector("#registration-form");
       const formStatus = document.querySelector("#form-status");
+      const themeToggle = document.querySelector("#theme-toggle");
+
+      const fields = [
+        {
+          input: document.querySelector("#full_name"),
+          error: document.querySelector("#full_name-error"),
+          message: "Please enter a full name.",
+        },
+        {
+          input: document.querySelector("#email"),
+          error: document.querySelector("#email-error"),
+          message: "Please enter a valid email address.",
+        },
+        {
+          input: document.querySelector("#rfid_uid"),
+          error: document.querySelector("#rfid_uid-error"),
+          message: "Enter a hexadecimal RFID UID (0-9 and A-F only).",
+        },
+      ];
+
+      function setThemeLabel() {
+        const isDark = document.documentElement.classList.contains("dark");
+        themeToggle.textContent = isDark
+          ? "Switch to light mode"
+          : "Switch to dark mode";
+      }
+
+      setThemeLabel();
+
+      themeToggle.addEventListener("click", () => {
+        const nextIsDark = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", nextIsDark);
+        try {
+          localStorage.setItem("tapInTheme", nextIsDark ? "dark" : "light");
+        } catch (error) {
+          console.error("Could not save the display theme preference.", error);
+        }
+        setThemeLabel();
+      });
+
+      function clearErrors() {
+        fields.forEach(({ input, error }) => {
+          error.textContent = "";
+          error.classList.add("hidden");
+          input.removeAttribute("aria-invalid");
+        });
+        formStatus.textContent = "";
+      }
+
+      function showError(field, message) {
+        field.error.textContent = message;
+        field.error.classList.remove("hidden");
+        field.input.setAttribute("aria-invalid", "true");
+      }
 
       // Keep Week 1 static: validate in the browser, but do not claim to save data.
       registrationForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        formStatus.textContent = "Form check passed. No member was saved; database registration will be connected later.";
+        clearErrors();
+
+        let firstInvalid = null;
+
+        fields.forEach((field) => {
+          const value = field.input.value.trim();
+          if (!field.input.checkValidity() || value === "") {
+            showError(field, field.message);
+            if (!firstInvalid) firstInvalid = field.input;
+          }
+        });
+
+        if (firstInvalid) {
+          formStatus.textContent = "Please fix the highlighted fields and try again.";
+          formStatus.classList.remove("text-emerald-800", "dark:text-emerald-300");
+          formStatus.classList.add("text-rose-700", "dark:text-rose-300");
+          firstInvalid.focus();
+          return;
+        }
+
+        formStatus.classList.remove("text-rose-700", "dark:text-rose-300");
+        formStatus.classList.add("text-emerald-800", "dark:text-emerald-300");
+        formStatus.textContent =
+          "Form check passed. No member was saved; database registration will be connected later.";
       });
     </script>
   </body>

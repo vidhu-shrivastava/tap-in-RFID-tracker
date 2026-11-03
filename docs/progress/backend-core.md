@@ -40,6 +40,14 @@
   Built: live Supabase tables from schema; deployed + smoke-tested `handle_rfid_scan` (`checked_in` then `already_checked_in`); public-repo secret pattern — keys live only in gitignored `supabase.local.js`, tracked `supabase.js` imports that file and keeps placeholders out of Git.
   How it works: teammates copy the `.example` → local keys file; browser loads `supabase.js` which pulls URL/anon from the ignored local module so the public GitHub repo never gets project credentials.
 
+- **2026-10-26 20:25** — Files: `frontend/lead-explore.html` (created), `database/lead_explore_seed.sql` (created), `docs/progress/backend-core.md`.
+  Built: Lead-only smoke-test page + SQL seed for a personal explore member (`vidhu.lead@tap-in.local` / `LEAD0001`) without editing teammate-owned HTML pages.
+  How it works: seed grants anon MVP access and inserts the explore row/event; `lead-explore.html` pings Supabase, finds that member, and calls `handleRfidScan` so Week 2 planning can verify the backend while UI owners keep iterating on their branches.
+
+- **2026-10-26 20:35** — Files: `supabase/` (init + migration + seed), `docs/LOCAL_SUPABASE.md`, `frontend/js/supabase.local.js.example`, `README.md`, `docs/progress/backend-core.md`.
+  Built: local Supabase CLI project so schema/RPC/seed can run in Docker from the IDE instead of only the cloud SQL Editor.
+  How it works: `npx supabase start` boots local API at `127.0.0.1:54321`; migrations mirror `/database/` SQL; `supabase.local.js` switches between cloud and local keys.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

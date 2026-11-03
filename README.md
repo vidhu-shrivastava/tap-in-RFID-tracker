@@ -76,7 +76,9 @@ git checkout <your-branch-name>   # e.g. branch-member-ui
 git branch                        # confirm * is on YOUR branch
 ```
 
-Open pages under `frontend/` in a browser. Wire Supabase keys in `frontend/js/supabase.js` (never commit the service-role key).
+Open pages under `frontend/` in a browser. Copy `frontend/js/supabase.local.js.example` → `supabase.local.js` and add your anon key (never commit the service-role key).
+
+**Local Supabase (optional, needs Docker):** see [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md) — `npx supabase start`, then point `supabase.local.js` at `http://127.0.0.1:54321`.
 
 When prompting Copilot, always tag:
 
