@@ -2,16 +2,12 @@
  * Copy this file to:  frontend/js/supabase.local.js
  * supabase.local.js is gitignored — do NOT commit real keys.
  *
- * CLOUD: Supabase → Project Settings → API (Project URL + anon public key)
- * LOCAL: after `npx supabase start`, use URL http://127.0.0.1:54321
- *        and the anon key from `npx supabase status`
- *        (see docs/LOCAL_SUPABASE.md)
+ * Cloud Supabase only → Project Settings → API
+ *   Project URL + anon / public key (never service_role)
+ *
+ * Do not point this at http://127.0.0.1:54321 / Docker.
+ * Setup: docs/LOCAL_SUPABASE.md
  */
 
 export const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
 export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-// --- Local example (uncomment + paste anon key from `npx supabase status`) ---
-// export const SUPABASE_URL = "http://127.0.0.1:54321";
-// export const SUPABASE_ANON_KEY = "YOUR_LOCAL_ANON_KEY";
-

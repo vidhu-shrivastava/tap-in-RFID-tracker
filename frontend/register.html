@@ -112,7 +112,7 @@
           </p>
         </div>
 
-        <!-- Week 1: static form UI only — same fields as before (name, email, RFID). -->
+        <!-- Same fields (name, email, RFID); submit writes to Supabase members. -->
         <form id="registration-form" class="space-y-5" novalidate>
           <div>
             <label
@@ -189,14 +189,15 @@
           </div>
 
           <button
+            id="submit-button"
             type="submit"
-            class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900 sm:w-auto"
+            class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-slate-900 sm:w-auto"
           >
             Submit registration
           </button>
         </form>
 
-        <!-- Demo-only status: confirms validation, not a database write. -->
+        <!-- Live status: validation errors or real Supabase insert result. -->
         <p
           id="form-status"
           class="mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300"
@@ -206,9 +207,12 @@
       </section>
     </main>
 
-    <script>
+    <script type="module">
+      import { registerMember, saveMemberSession } from "./js/supabase.js";
+
       const registrationForm = document.querySelector("#registration-form");
       const formStatus = document.querySelector("#form-status");
+      const submitButton = document.querySelector("#submit-button");
       const themeToggle = document.querySelector("#theme-toggle");
 
       const fields = [
@@ -264,8 +268,8 @@
         field.input.setAttribute("aria-invalid", "true");
       }
 
-      // Keep Week 1 static: validate in the browser, but do not claim to save data.
-      registrationForm.addEventListener("submit", (event) => {
+      // Validate in the browser, then INSERT into Supabase members.
+      registrationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearErrors();
 
@@ -281,16 +285,56 @@
 
         if (firstInvalid) {
           formStatus.textContent = "Please fix the highlighted fields and try again.";
-          formStatus.classList.remove("text-emerald-800", "dark:text-emerald-300");
+          formStatus.classList.remove(
+            "text-emerald-800",
+            "dark:text-emerald-300"
+          );
           formStatus.classList.add("text-rose-700", "dark:text-rose-300");
           firstInvalid.focus();
           return;
         }
 
         formStatus.classList.remove("text-rose-700", "dark:text-rose-300");
+        formStatus.classList.add("text-slate-700", "dark:text-slate-300");
+        formStatus.textContent = "Saving member to Supabase…";
+        submitButton.disabled = true;
+
+        const { data: member, error } = await registerMember({
+          full_name: document.querySelector("#full_name").value,
+          email: document.querySelector("#email").value,
+          rfid_uid: document.querySelector("#rfid_uid").value,
+        });
+
+        submitButton.disabled = false;
+
+        if (error) {
+          const msg = error.message || "Registration failed.";
+          const isDuplicate =
+            msg.toLowerCase().includes("duplicate") ||
+            msg.toLowerCase().includes("unique");
+          formStatus.textContent = isDuplicate
+            ? "That email or RFID UID is already registered."
+            : `Could not save member: ${msg}`;
+          formStatus.classList.remove(
+            "text-emerald-800",
+            "dark:text-emerald-300",
+            "text-slate-700",
+            "dark:text-slate-300"
+          );
+          formStatus.classList.add("text-rose-700", "dark:text-rose-300");
+          return;
+        }
+
+        saveMemberSession(member);
+        formStatus.classList.remove(
+          "text-rose-700",
+          "dark:text-rose-300",
+          "text-slate-700",
+          "dark:text-slate-300"
+        );
         formStatus.classList.add("text-emerald-800", "dark:text-emerald-300");
-        formStatus.textContent =
-          "Form check passed. No member was saved; database registration will be connected later.";
+        formStatus.textContent = "Registered! Opening your dashboard…";
+        window.location.href = "dashboard.html";
       });
     </script>
   </body>

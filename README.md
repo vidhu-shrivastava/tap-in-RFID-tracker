@@ -2,30 +2,38 @@
 
 University engineering-fraternity SWE MVP: members tap an RFID card at events, attendance is logged in Supabase, and points show up on simple web dashboards.
 
-**Status:** `main` is the shared scaffold (docs + empty/placeholder files). Feature work happens on per-person branches, then merges back into `main`.
+| Phase | Focus |
+|-------|--------|
+| **Phase 1** | Schema, scan RPC, member + admin web UIs, cloud Supabase wiring, Arduino UID read over Serial |
+| **Phase 2** | Account auth, polished dashboards, hardware WiFi tap path (Arduino → receive server → DB) |
 
 ---
 
 ## What it does
 
-1. **Hardware** scans an RFID card (Arduino UNO R4 WiFi + RC522 + OLED + buzzer).
-2. **Database** stores members, events, and attendance logs (Supabase PostgreSQL).
-3. **Web UI** lets members register cards / see points, and execs manage events / analytics.
+1. **Hardware** scans an RFID card (Arduino UNO R4 WiFi + RC522; OLED + buzzer planned).
+2. **Database** stores members, events, and attendance logs (Supabase PostgreSQL + `handle_rfid_scan` RPC).
+3. **Web UI** lets members register / see points, and execs manage events and attendance analytics.
+4. **Backend receive** accepts `POST /scan` from the scanner so secrets stay off the firmware (KTP host later).
+
+```text
+Card → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_logs + points → dashboards
+```
 
 ---
 
-## Tech stack (intentionally simple)
+## Tech stack
 
 | Layer | Choice |
 |-------|--------|
 | Frontend | Vanilla HTML5, Tailwind CSS via CDN, Vanilla JS |
-| Backend / data | Supabase (PostgreSQL + JS client via CDN) |
+| Data | Cloud Supabase (PostgreSQL + JS client via CDN) |
+| Hardware receive | `backend/receive_scan.py` (stdlib Python) |
 | Hardware | Arduino C++ on UNO R4 WiFi |
-| Analytics | Chart.js CDN and/or Retool (admin) |
-| Tooling | VS Code + GitHub Copilot (no React, no bundlers, no Flask/Next) |
+| Analytics | Chart.js CDN (admin) |
+| Tooling | VS Code + GitHub Copilot — no React, bundlers, or Flask/Next |
 
-Full AI/coding rules: [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md)  
-Beginner Git + Copilot guide: [`docs/GIT_AND_COPILOT_GUIDE.md`](docs/GIT_AND_COPILOT_GUIDE.md)
+Guides: [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md) · [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md) · [`docs/HARDWARE_TAP_PATH.md`](docs/HARDWARE_TAP_PATH.md) · [`docs/GIT_AND_COPILOT_GUIDE.md`](docs/GIT_AND_COPILOT_GUIDE.md)
 
 ---
 
@@ -33,13 +41,16 @@ Beginner Git + Copilot guide: [`docs/GIT_AND_COPILOT_GUIDE.md`](docs/GIT_AND_COP
 
 ```text
 /
-├── docs/                  # Guides + per-branch progress logs
-├── database/schema.sql    # Supabase schema
-├── frontend/              # HTML pages + js/supabase.js
-└── hardware/tap_in_scanner/   # Arduino sketch
+├── docs/                       # Guides + per-branch progress logs
+├── database/                   # Schema, scan RPC, cloud seed SQL
+├── frontend/                   # HTML pages + js/supabase.js
+├── backend/                    # Thin HTTP receive for hardware taps
+└── hardware/tap_in_scanner/    # Arduino sketch
 ```
 
-Progress logs are **separate files per branch** (`docs/progress/*.md`) so parallel work does not conflict when merging into `main`. Index: [`docs/PROGRESS_TRACKER.md`](docs/PROGRESS_TRACKER.md).
+Progress logs are per branch under `docs/progress/` so parallel work merges cleanly. Index: [`docs/PROGRESS_TRACKER.md`](docs/PROGRESS_TRACKER.md).
+
+The `supabase/` CLI folder is unused legacy — SQL lives in `database/`. **No Docker.**
 
 ---
 
@@ -47,11 +58,11 @@ Progress logs are **separate files per branch** (`docs/progress/*.md`) so parall
 
 | Branch | Owner | Owns |
 |--------|--------|------|
-| `branch-backend-core` | Vidhu (Lead) | `frontend/js/supabase.js`, shared docs, backend integration |
+| `branch-backend-core` | Vidhu (Lead) | `frontend/js/supabase.js`, `database/rpc_handle_scan.sql`, `backend/`, shared docs |
 | `branch-hardware` | Kathleen | `/hardware/` |
-| `branch-member-ui` | Turner | `frontend/index.html`, `frontend/dashboard.html` |
-| `branch-db-onboarding` | Jayati / Kailash | `database/schema.sql`, `frontend/register.html` |
-| `branch-admin-analytics` | Jayati / Kailash | `frontend/admin.html` |
+| `branch-member-ui` | Turner | `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html` |
+| `branch-db-onboarding` | Jayati | `database/schema.sql`, `frontend/register.html` |
+| `branch-admin-analytics` | Kailash | `frontend/admin.html` |
 
 **Rule:** Stay on your branch. Never push to `main`. Only edit your assigned files (+ your own `docs/progress/<file>.md`).
 
@@ -60,41 +71,53 @@ Progress logs are **separate files per branch** (`docs/progress/*.md`) so parall
 ## Database (MVP schema)
 
 - **`members`** — `id`, `full_name`, `email`, `rfid_uid`, `total_points`
-- **`events`** — `id`, `event_name`, `event_date`, `point_value`, `is_active`
+- **`events`** — `id`, `event_name`, `event_date`, `point_value`, `is_active`, `is_archived`
 - **`attendance_logs`** — `id`, `member_id`, `event_id`, `scanned_at`
+- **RPC** — `handle_rfid_scan(scanned_uid)`
 
-Details and constraints live in [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md) and [`database/schema.sql`](database/schema.sql).
+Details: [`database/schema.sql`](database/schema.sql), [`database/rpc_handle_scan.sql`](database/rpc_handle_scan.sql), [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md).
 
 ---
 
-## Quick start (teammates)
+## Quick start (cloud Supabase)
+
+1. Copy local secrets (gitignored):
+
+```bash
+cp frontend/js/supabase.local.js.example frontend/js/supabase.local.js
+cp frontend/js/admin.local.js.example frontend/js/admin.local.js
+```
+
+2. Paste your cloud Supabase Project URL + anon key into `supabase.local.js`, then run the SQL under `database/` in the Supabase SQL Editor (see [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md)).
+
+3. Serve the frontend:
+
+```bash
+cd frontend
+python3 -m http.server 5500
+```
+
+Open **http://localhost:5500/index.html**.
+
+| Flow | How |
+|------|-----|
+| Register | `register.html` |
+| Sign in | `index.html` → `dashboard.html` |
+| Admin | `admin.html` (password from `admin.local.js`) |
+| Test scan | Admin → RFID UID → `handle_rfid_scan` |
+| Hardware receive | `cd backend && python3 receive_scan.py` — see [`docs/HARDWARE_TAP_PATH.md`](docs/HARDWARE_TAP_PATH.md) |
+
+### Teammate workflow
 
 ```bash
 git clone <repo-url>
 cd tap-in-RFID-tracker
-git checkout <your-branch-name>   # e.g. branch-member-ui
-git branch                        # confirm * is on YOUR branch
+git checkout <your-branch-name>
+git branch   # confirm * is on YOUR branch
 ```
 
-Open pages under `frontend/` in a browser. Copy `frontend/js/supabase.local.js.example` → `supabase.local.js` and add your anon key (never commit the service-role key).
-
-**Local Supabase (optional, needs Docker):** see [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md) — `npx supabase start`, then point `supabase.local.js` at `http://127.0.0.1:54321`.
-
-When prompting Copilot, always tag:
-
-1. `@docs/AI_CODING_SKILLS.md`
-2. Your `@docs/progress/<your-file>.md`
-3. The file you are editing
+When prompting Copilot, tag `@docs/AI_CODING_SKILLS.md`, your `@docs/progress/<file>.md`, and the file you are editing.
 
 ---
 
-## For reviewers (e.g. Andrew)
-
-`main` today is scaffolding + team process docs so five people with mixed Git experience can work in parallel without stepping on each other. Looking for feedback on:
-
-- Monorepo split (hardware / database / frontend / docs)
-- Branch ownership and merge-safe progress logs
-- Stack choice (vanilla + Supabase + Arduino vs heavier frameworks)
-- Schema shape for attendance + points
-
-Questions or suggested changes → message Vidhu
+Questions → message Vidhu

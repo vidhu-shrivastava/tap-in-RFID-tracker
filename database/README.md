@@ -4,8 +4,12 @@ This folder is shared across branches. **Edit only your file. Never delete someo
 
 | File | Owner branch | Who |
 |------|----------------|-----|
-| `schema.sql` | `branch-db-onboarding` | Jayati | 
+| `schema.sql` | `branch-db-onboarding` | Jayati |
 | `rpc_handle_scan.sql` | `branch-backend-core` | Vidhu |
+| `lead_explore_seed.sql` | `branch-backend-core` | Vidhu (cloud RLS + team seed) |
+| `add_is_archived.sql` | `branch-backend-core` | Vidhu (optional patch if cloud DB predates `is_archived`) |
+
+Paste these into the **cloud** Supabase SQL Editor (see `docs/LOCAL_SUPABASE.md`). Do not use Docker.
 
 ## Rules
 

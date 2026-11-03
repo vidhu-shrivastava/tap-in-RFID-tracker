@@ -29,11 +29,11 @@
         <dl class="mt-4 space-y-2 text-sm">
           <div class="flex gap-2">
             <dt class="w-28 font-medium text-slate-500">Email</dt>
-            <dd><code id="acct-email">vidhu.lead@tap-in.local</code></dd>
+            <dd><code id="acct-email">vidhu.shrivastava@uga.edu</code></dd>
           </div>
           <div class="flex gap-2">
             <dt class="w-28 font-medium text-slate-500">RFID UID</dt>
-            <dd><code id="acct-uid">LEAD0001</code></dd>
+            <dd><code id="acct-uid">ADMIN001</code></dd>
           </div>
           <div class="flex gap-2">
             <dt class="w-28 font-medium text-slate-500">Name</dt>
@@ -69,7 +69,7 @@
             type="button"
             class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            3. Test scan RPC (LEAD0001)
+            3. Test scan RPC (ADMIN001)
           </button>
         </div>
         <pre
@@ -81,15 +81,15 @@
       <section class="rounded-xl border border-dashed border-slate-300 bg-white/70 p-6">
         <h2 class="text-lg font-semibold">Open teammate pages (read-only review)</h2>
         <p class="mt-2 text-sm text-slate-600">
-          Sign-in is not wired yet on their branch work — open pages directly to
-          review UI. Wiring is Week 2 work for each owner.
+          Product entry is <a class="underline" href="index.html">index.html</a>.
+          This page is only an optional RPC smoke tool.
         </p>
         <ul class="mt-4 list-inside list-disc space-y-1 text-sm text-teal-900">
-          <li><a class="underline" href="index.html">index.html</a> (member-ui)</li>
-          <li><a class="underline" href="dashboard.html">dashboard.html</a> (member-ui)</li>
-          <li><a class="underline" href="register.html">register.html</a> (db-onboarding)</li>
-          <li><a class="underline" href="admin.html">admin.html</a> (admin-analytics)</li>
-          <li><a class="underline" href="profile-settings.html">profile-settings.html</a> (member-ui)</li>
+          <li><a class="underline" href="index.html">index.html</a> — sign in</li>
+          <li><a class="underline" href="dashboard.html">dashboard.html</a> — member points</li>
+          <li><a class="underline" href="register.html">register.html</a> — card registration</li>
+          <li><a class="underline" href="admin.html">admin.html</a> — events / scan / chart</li>
+          <li><a class="underline" href="profile-settings.html">profile-settings.html</a> — profile cosmetics</li>
         </ul>
       </section>
     </main>
@@ -98,8 +98,8 @@
       import { supabase, handleRfidScan } from "./js/supabase.js";
 
       const out = document.getElementById("out");
-      const EXPLORE_EMAIL = "vidhu.lead@tap-in.local";
-      const EXPLORE_UID = "LEAD0001";
+      const EXPLORE_EMAIL = "vidhu.shrivastava@uga.edu";
+      const EXPLORE_UID = "ADMIN001";
 
       function show(label, payload) {
         out.textContent =

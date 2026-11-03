@@ -46,7 +46,7 @@
               aria-hidden="true"
               class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-xs font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
             >
-              <span class="avatar-initials">AM</span>
+              <span class="avatar-initials">…</span>
               <img class="avatar-image hidden h-full w-full object-cover" alt="" />
             </span>
             <span class="hidden sm:inline">Account</span>
@@ -75,13 +75,14 @@
             >
               Profile settings
             </a>
-            <a
-              href="index.html"
+            <button
+              id="sign-out-button"
+              type="button"
               role="menuitem"
-              class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Sign out
-            </a>
+            </button>
           </div>
         </div>
       </nav>
@@ -97,7 +98,7 @@
           id="welcome-heading"
           class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
         >
-          Welcome back, Alex
+          Welcome back
         </h1>
         <p class="mt-2 text-slate-600 dark:text-slate-300">
           Here are your attendance points and recent event visits.
@@ -116,12 +117,12 @@
               aria-hidden="true"
               class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
             >
-              <span class="avatar-initials">AM</span>
+              <span class="avatar-initials">…</span>
               <img class="avatar-image hidden h-full w-full object-cover" alt="" />
             </div>
             <div class="min-w-0">
               <h2 id="display-profile-name" class="truncate text-lg font-semibold">
-                Alex Member
+                Loading…
               </h2>
               <p
                 id="display-preferred-name"
@@ -129,6 +130,10 @@
               >
                 Tap-In member
               </p>
+              <p
+                id="display-member-email"
+                class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400"
+              ></p>
             </div>
           </div>
           <div class="sm:w-64">
@@ -137,29 +142,41 @@
                 Attendance points
               </h2>
               <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">
-                <span class="text-2xl">40</span>
+                <span id="points-value" class="text-2xl">0</span>
                 <span class="text-slate-500 dark:text-slate-400">/ 100</span>
               </p>
             </div>
             <div
+              id="points-bar-wrap"
               class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"
               role="progressbar"
               aria-label="Attendance points progress"
               aria-valuemin="0"
               aria-valuemax="100"
-              aria-valuenow="40"
+              aria-valuenow="0"
             >
-              <div class="h-full w-2/5 rounded-full bg-teal-700"></div>
+              <div
+                id="points-bar"
+                class="h-full rounded-full bg-teal-700"
+                style="width: 0%"
+              ></div>
             </div>
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">60 points to your 100-point goal</p>
+            <p
+              id="points-goal-text"
+              class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+            >
+              Loading points…
+            </p>
           </div>
         </div>
         <p
           id="profile-load-status"
-          class="mt-4 text-sm text-rose-700 dark:text-rose-300"
+          class="mt-4 text-sm text-slate-600 dark:text-slate-300"
           role="status"
           aria-live="polite"
-        ></p>
+        >
+          Loading your membership…
+        </p>
       </section>
 
       <!-- The scrollable table keeps all history columns usable on small screens. -->
@@ -172,7 +189,7 @@
             Previous attendance
           </h2>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Example scan timestamps (static sample data).
+            Live scan timestamps from Supabase attendance logs.
           </p>
         </div>
         <div class="overflow-x-auto">
@@ -186,44 +203,16 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody
+              id="attendance-body"
+              class="divide-y divide-slate-100 dark:divide-slate-800"
+            >
               <tr>
-                <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">
-                  <time datetime="2026-10-10T18:42:17-04:00">
-                    Oct 10, 2026<br />6:42:17 PM EDT
-                  </time>
-                </td>
-                <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
-                  Welcome Meetup
-                </td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">
-                  +15
-                </td>
-              </tr>
-              <tr>
-                <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">
-                  <time datetime="2026-10-03T13:08:54-04:00">
-                    Oct 3, 2026<br />1:08:54 PM EDT
-                  </time>
-                </td>
-                <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
-                  Tech Workshop
-                </td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">
-                  +15
-                </td>
-              </tr>
-              <tr>
-                <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">
-                  <time datetime="2026-09-26T09:15:03-04:00">
-                    Sep 26, 2026<br />9:15:03 AM EDT
-                  </time>
-                </td>
-                <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
-                  Club Kickoff
-                </td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">
-                  +10
+                <td
+                  colspan="3"
+                  class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8"
+                >
+                  Loading attendance…
                 </td>
               </tr>
             </tbody>
@@ -231,43 +220,63 @@
         </div>
       </section>
     </main>
-    <!-- Vanilla JavaScript opens the menu and switches the page color theme. -->
-    <script>
+
+    <!-- Vanilla JS: theme/menu (Turner) + live Supabase data. -->
+    <script type="module">
+      import {
+        getMemberSession,
+        clearMemberSession,
+        getMemberById,
+        getMemberAttendance,
+      } from "./js/supabase.js";
+
       const menuButton = document.getElementById("account-menu-button");
       const accountMenu = document.getElementById("account-menu");
       const themeToggle = document.getElementById("theme-toggle");
+      const signOutButton = document.getElementById("sign-out-button");
+      const statusEl = document.getElementById("profile-load-status");
       let themeTransitionTimer;
 
-      function showProfile(profile) {
-        const profileName =
-          typeof profile.name === "string" && profile.name.trim()
-            ? profile.name.trim()
-            : "Alex Member";
+      const session = getMemberSession();
+      if (!session) {
+        window.location.href = "index.html";
+      }
+
+      /**
+       * Apply cosmetic preferred name / picture from Turner's profile-settings
+       * localStorage, layered on top of the live Supabase full_name.
+       */
+      function showProfile(profileName, preferredFromStorage) {
         const preferredName =
-          typeof profile.preferredName === "string"
-            ? profile.preferredName.trim()
+          typeof preferredFromStorage === "string"
+            ? preferredFromStorage.trim()
             : "";
-        const initials = profileName
+        const displayName =
+          typeof profileName === "string" && profileName.trim()
+            ? profileName.trim()
+            : "Member";
+        const initials = displayName
           .split(/\s+/)
           .slice(0, 2)
           .map((part) => part.charAt(0).toUpperCase())
           .join("");
 
-        document.getElementById("display-profile-name").textContent = profileName;
+        document.getElementById("display-profile-name").textContent = displayName;
         document.getElementById("welcome-heading").textContent =
-          `Welcome back, ${preferredName || profileName.split(/\s+/)[0]}`;
+          `Welcome back, ${preferredName || displayName.split(/\s+/)[0]}`;
         document.getElementById("display-preferred-name").textContent =
           preferredName ? `Preferred name: ${preferredName}` : "Tap-In member";
 
         document.querySelectorAll(".avatar-initials").forEach((element) => {
-          element.textContent = initials;
+          element.textContent = initials || "?";
+          element.classList.remove("hidden");
         });
+      }
+
+      function applyCosmeticPicture(picture) {
         document.querySelectorAll(".avatar-image").forEach((image) => {
-          if (
-            typeof profile.picture === "string" &&
-            profile.picture.startsWith("data:image/")
-          ) {
-            image.src = profile.picture;
+          if (typeof picture === "string" && picture.startsWith("data:image/")) {
+            image.src = picture;
             image.classList.remove("hidden");
             image.previousElementSibling.classList.add("hidden");
           } else {
@@ -278,25 +287,106 @@
         });
       }
 
+      function renderPoints(totalPoints) {
+        const goal = 100;
+        const points = Number(totalPoints) || 0;
+        const capped = Math.min(points, goal);
+        const pct = Math.round((capped / goal) * 100);
+
+        document.getElementById("points-value").textContent = String(points);
+        document.getElementById("points-bar").style.width = `${pct}%`;
+        document
+          .getElementById("points-bar-wrap")
+          .setAttribute("aria-valuenow", String(capped));
+        document.getElementById("points-goal-text").textContent =
+          points >= goal
+            ? "Goal reached — nice work!"
+            : `${goal - points} points to your ${goal}-point goal`;
+      }
+
+      function renderAttendance(rows) {
+        const body = document.getElementById("attendance-body");
+        if (!rows.length) {
+          body.innerHTML = `
+            <tr>
+              <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8">
+                No attendance yet. Tap in at an active event to see history here.
+              </td>
+            </tr>`;
+          return;
+        }
+
+        body.innerHTML = rows
+          .map((row) => {
+            const when = row.scanned_at
+              ? new Date(row.scanned_at).toLocaleString()
+              : "—";
+            const eventName = row.events?.event_name || "Unknown event";
+            const pts = row.events?.point_value ?? "—";
+            return `
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">${when}</td>
+                <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">${eventName}</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">+${pts}</td>
+              </tr>`;
+          })
+          .join("");
+      }
+
+      async function loadDashboard() {
+        const { data: member, error: memberError } = await getMemberById(session.id);
+        if (memberError || !member) {
+          statusEl.textContent =
+            "Could not load your member row. Sign in again or check Supabase.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+          return;
+        }
+
+        let preferredName = "";
+        let picture = "";
+        try {
+          const savedProfile = localStorage.getItem("tapInMemberProfile");
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            if (profile && typeof profile === "object") {
+              preferredName =
+                typeof profile.preferredName === "string"
+                  ? profile.preferredName
+                  : "";
+              picture =
+                typeof profile.picture === "string" ? profile.picture : "";
+            }
+          }
+        } catch (error) {
+          console.error("Could not load saved profile settings.", error);
+        }
+
+        showProfile(member.full_name, preferredName);
+        applyCosmeticPicture(picture);
+        document.getElementById("display-member-email").textContent = member.email;
+        renderPoints(member.total_points);
+
+        const { data: logs, error: logsError } = await getMemberAttendance(member.id);
+        if (logsError) {
+          statusEl.textContent =
+            "Member loaded, but attendance history failed to load.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+          renderAttendance([]);
+          return;
+        }
+
+        renderAttendance(logs);
+        statusEl.textContent = `Signed in as ${member.email}`;
+        statusEl.className = "mt-4 text-sm text-slate-600 dark:text-slate-300";
+      }
+
       try {
         if (localStorage.getItem("tapInTheme") === "dark") {
           document.documentElement.classList.add("dark");
           themeToggle.textContent = "Switch to light mode";
         }
-
-        const savedProfile = localStorage.getItem("tapInMemberProfile");
-        if (savedProfile) {
-          const profile = JSON.parse(savedProfile);
-          if (profile && typeof profile === "object") {
-            showProfile(profile);
-          } else {
-            throw new Error("Saved profile data is not an object.");
-          }
-        }
       } catch (error) {
-        console.error("Could not load saved profile settings.", error);
-        document.getElementById("profile-load-status").textContent =
-          "Saved profile settings could not be loaded in this browser.";
+        console.error("Could not load the display theme preference.", error);
       }
 
       function closeAccountMenu() {
@@ -329,6 +419,11 @@
         }, 1500);
       });
 
+      signOutButton.addEventListener("click", () => {
+        clearMemberSession();
+        window.location.href = "index.html";
+      });
+
       document.addEventListener("click", (event) => {
         if (!event.target.closest("#account-menu-button, #account-menu")) {
           closeAccountMenu();
@@ -341,6 +436,8 @@
           menuButton.focus();
         }
       });
+
+      loadDashboard();
     </script>
   </body>
 </html>

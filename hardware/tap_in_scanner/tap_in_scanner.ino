@@ -1,3 +1,22 @@
+/*
+ * Tap-In RFID scanner — Arduino UNO R4 WiFi + RC522
+ * Owner branch: branch-hardware (Kathleen)
+ *
+ * CURRENT BEHAVIOR (Week 1):
+ *   Read the card UID and print it to Serial Monitor.
+ *
+ * WHERE THE UID GOES NEXT (see docs/HARDWARE_TAP_PATH.md):
+ *   1. Admin "Test RFID scan" — same DB RPC, no Arduino needed for demos.
+ *   2. POST JSON { "uid": "<HEX>" } to backend/receive_scan.py
+ *      (default http://127.0.0.1:8787/scan) — preferred for WiFi + KTP server.
+ *   3. Optional: POST directly to Supabase REST
+ *      {SUPABASE_URL}/rest/v1/rpc/handle_rfid_scan with body
+ *      { "scanned_uid": "<HEX>" }.
+ *
+ * WiFi HTTP POST belongs in a later edit of this sketch; keep UID printing
+ * so beginners can verify the RC522 before networking.
+ */
+
 #include <SPI.h>
 #include <MFRC522.h>
 
