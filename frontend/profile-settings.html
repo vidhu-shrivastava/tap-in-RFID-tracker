@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Update your Tap-In member profile settings."
+      content="Update your Tap-IN member profile settings."
     />
-    <title>Profile Settings | Tap-In</title>
+    <title>Profile Settings | Tap-IN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: "class" };
@@ -21,18 +21,23 @@
       }
     </script>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <body class="min-h-screen bg-gradient-to-br from-green-100 via-emerald-50 to-teal-100 text-slate-900 dark:bg-slate-950 dark:bg-none dark:text-slate-100">
     <!-- Keep the settings page navigation simple and easy to leave. -->
-    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <header class="border-b border-emerald-200 bg-white/90 shadow-sm shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:shadow-[0_1px_14px_rgba(16,185,129,0.12)]">
       <nav
         aria-label="Main navigation"
         class="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6"
       >
         <a
           href="dashboard.html"
-          class="text-lg font-bold tracking-tight text-teal-800 dark:text-teal-300"
+          class="flex items-center gap-2 text-lg font-bold tracking-tight text-emerald-900 dark:text-teal-300"
         >
-          Tap-In
+          <svg aria-hidden="true" class="h-8 w-8 text-emerald-700 dark:text-emerald-400" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="40" height="40" rx="12" stroke="currentColor" stroke-width="2.5" />
+            <path d="M13 16h18M22 16v19" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <path d="M31 21c2.5 2 2.5 6 0 8M35 17c5 4 5 12 0 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+          </svg>
+          <span>Tap-IN</span>
         </a>
         <a
           href="dashboard.html"
@@ -47,10 +52,10 @@
     <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
       <section
         aria-labelledby="settings-heading"
-        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+        class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-lg shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:ring-1 dark:ring-emerald-500/30 dark:shadow-[0_0_22px_rgba(16,185,129,0.12)] sm:p-8"
       >
         <div class="mb-8">
-          <p class="text-sm font-semibold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+          <p           class="text-sm font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
             Account
           </p>
           <h1
@@ -60,14 +65,14 @@
             Profile settings
           </h1>
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Update your profile picture and the names shown on your dashboard.
+            Update your profile picture and preferred name. Your account name cannot be changed.
           </p>
         </div>
 
         <form id="profile-form" class="space-y-6">
           <div class="flex items-center gap-4">
             <div
-              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-green-100 via-emerald-100 to-teal-100 text-lg font-bold text-emerald-900 ring-4 ring-emerald-50 shadow-sm shadow-emerald-900/10 dark:from-emerald-950 dark:via-teal-900 dark:to-cyan-900 dark:text-emerald-200 dark:ring-emerald-500/60 dark:shadow-[0_0_16px_rgba(16,185,129,0.18)]"
             >
               <span id="avatar-initials">AM</span>
               <img
@@ -98,20 +103,19 @@
 
           <div class="grid gap-5 sm:grid-cols-2">
             <div>
-              <label
-                for="profile-name"
-                class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              <span class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Account name
+              </span>
+              <p
+                id="account-name"
+                class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                aria-live="polite"
               >
-                Profile name
-              </label>
-              <input
-                id="profile-name"
-                name="profile-name"
-                type="text"
-                autocomplete="name"
-                required
-                class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-              />
+                Alex Member
+              </p>
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Account names are managed by your administrator.
+              </p>
             </div>
             <div>
               <label
@@ -125,7 +129,7 @@
                 name="preferred-name"
                 type="text"
                 autocomplete="nickname"
-                class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
               />
             </div>
           </div>
@@ -138,17 +142,17 @@
           ></p>
 
           <!-- Both exit choices stay together at the bottom of the form. -->
-          <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end dark:border-slate-800">
+          <div class="flex flex-col-reverse gap-3 border-t border-emerald-100 pt-6 sm:flex-row sm:justify-end dark:border-emerald-900">
             <button
               id="exit-without-saving"
               type="button"
-              class="rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              class="rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:border-emerald-700 dark:text-slate-200 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/50"
             >
               Exit without Saving
             </button>
             <button
               type="submit"
-              class="rounded-lg bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+              class="rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
             >
               Save and Exit
             </button>
@@ -161,11 +165,12 @@
     <script>
       const profileForm = document.getElementById("profile-form");
       const profilePictureInput = document.getElementById("profile-picture");
-      const profileNameInput = document.getElementById("profile-name");
+      const accountNameDisplay = document.getElementById("account-name");
       const preferredNameInput = document.getElementById("preferred-name");
       const avatarInitials = document.getElementById("avatar-initials");
       const avatarPreview = document.getElementById("avatar-preview");
       const profileStatus = document.getElementById("profile-status");
+      let accountName = "Alex Member";
       let selectedPicture = "";
       let imageIsReading = false;
 
@@ -195,31 +200,31 @@
           if (!profile || typeof profile !== "object") {
             throw new Error("Saved profile data is not an object.");
           }
-          profileNameInput.value = profile.name || "Alex Member";
+          accountName =
+            typeof profile.name === "string" && profile.name.trim()
+              ? profile.name.trim()
+              : "Alex Member";
+          accountNameDisplay.textContent = accountName;
           preferredNameInput.value = profile.preferredName || "";
           selectedPicture =
             typeof profile.picture === "string" &&
             profile.picture.startsWith("data:image/")
               ? profile.picture
               : "";
-          setAvatar(selectedPicture, profileNameInput.value);
+          setAvatar(selectedPicture, accountName);
         } else {
-          profileNameInput.value = "Alex Member";
+          accountNameDisplay.textContent = accountName;
           preferredNameInput.value = "Alex";
-          setAvatar("", profileNameInput.value);
+          setAvatar("", accountName);
         }
       } catch (error) {
         console.error("Could not load saved profile settings.", error);
         profileStatus.textContent =
           "Saved profile settings could not be loaded. You can still enter new values.";
-        profileNameInput.value = "Alex Member";
+        accountNameDisplay.textContent = accountName;
         preferredNameInput.value = "Alex";
-        setAvatar("", profileNameInput.value);
+        setAvatar("", accountName);
       }
-
-      profileNameInput.addEventListener("input", () => {
-        setAvatar(selectedPicture, profileNameInput.value.trim());
-      });
 
       profilePictureInput.addEventListener("change", () => {
         const picture = profilePictureInput.files[0];
@@ -247,7 +252,7 @@
           imageIsReading = false;
           if (typeof reader.result === "string") {
             selectedPicture = reader.result;
-            setAvatar(selectedPicture, profileNameInput.value.trim());
+            setAvatar(selectedPicture, accountName);
           } else {
             profileStatus.textContent = "The image could not be previewed.";
           }
@@ -267,16 +272,10 @@
         }
 
         const profile = {
-          name: profileNameInput.value.trim(),
+          name: accountName,
           preferredName: preferredNameInput.value.trim(),
           picture: selectedPicture,
         };
-
-        if (!profile.name) {
-          profileNameInput.focus();
-          profileStatus.textContent = "Enter a profile name before saving.";
-          return;
-        }
 
         try {
           localStorage.setItem("tapInMemberProfile", JSON.stringify(profile));

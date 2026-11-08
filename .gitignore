@@ -101,6 +101,7 @@ supabase/.branches/
 # Per-person Week 1 plans (do not merge onto main)
 # -----------------------------------------------------------------------------
 WEEK_1_PLAN.md
+PHASE_2_PLAN.md
 
 # -----------------------------------------------------------------------------
 # Local scratch / merge artifacts (never commit)
