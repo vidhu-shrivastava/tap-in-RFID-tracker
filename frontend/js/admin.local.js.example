@@ -1,0 +1,9 @@
+/**
+ * Copy this file to:  frontend/js/admin.local.js
+ * admin.local.js is gitignored — do NOT commit the real password.
+ *
+ * Share the password offline with execs who need the admin dashboard.
+ * This is a light MVP gate only (not real Auth).
+ */
+
+export const ADMIN_PASSWORD = "change-me-before-demo";

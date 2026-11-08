@@ -40,6 +40,30 @@
   Built: live Supabase tables from schema; deployed + smoke-tested `handle_rfid_scan` (`checked_in` then `already_checked_in`); public-repo secret pattern — keys live only in gitignored `supabase.local.js`, tracked `supabase.js` imports that file and keeps placeholders out of Git.
   How it works: teammates copy the `.example` → local keys file; browser loads `supabase.js` which pulls URL/anon from the ignored local module so the public GitHub repo never gets project credentials.
 
+- **2026-10-26 20:25** — Files: `frontend/lead-explore.html` (created), `database/lead_explore_seed.sql` (created), `docs/progress/backend-core.md`.
+  Built: Lead-only smoke-test page + SQL seed for a personal explore member (`vidhu.lead@tap-in.local` / `LEAD0001`) without editing teammate-owned HTML pages.
+  How it works: seed grants anon MVP access and inserts the explore row/event; `lead-explore.html` pings Supabase, finds that member, and calls `handleRfidScan` so Week 2 planning can verify the backend while UI owners keep iterating on their branches.
+
+- **2026-10-26 20:35** — Files: `supabase/` (init + migration + seed), `docs/LOCAL_SUPABASE.md`, `frontend/js/supabase.local.js.example`, `README.md`, `docs/progress/backend-core.md`.
+  Built: local Supabase CLI project so schema/RPC/seed can run in Docker from the IDE instead of only the cloud SQL Editor.
+  How it works: `npx supabase start` boots local API at `127.0.0.1:54321`; migrations mirror `/database/` SQL; `supabase.local.js` switches between cloud and local keys.
+
+- **2026-11-02 12:20** — Files: `frontend/js/supabase.js`, `frontend/index.html`, `frontend/dashboard.html`, `frontend/register.html`, `frontend/admin.html`, `frontend/js/admin.local.js.example`, `.gitignore`, `supabase/seed.sql`, `docs/LOCAL_SUPABASE.md`, `README.md`, `frontend/lead-explore.html` (nav copy only).
+  Built: Wired the merged Week-1 UIs into one localhost app — shared session/member/event/attendance helpers; Turner sign-in + live dashboard; Jayati register INSERT; functional admin (events activate, scan RPC, Chart.js) behind gitignored admin password; demo seed members/events; docs entry points at `index.html`.
+  How it works: pages import helpers from `supabase.js`; MVP auth is email lookup + `sessionStorage`; register writes `members`; admin uses the same `handle_rfid_scan` RPC hardware will call; product flow no longer depends on the optional smoke page.
+
+- **2026-11-02 12:55** — Files: `docs/LOCAL_SUPABASE.md`, `docs/HARDWARE_TAP_PATH.md` (created), `README.md`, `docs/AI_CODING_SKILLS.md`, `frontend/js/supabase.local.js.example`, `backend/` (`receive_scan.py`, README, `.env.example`), `.gitignore`, `hardware/tap_in_scanner/tap_in_scanner.ino` (header comments only).
+  Built: Cloud-first setup docs (Docker optional appendix); monorepo `backend/` POST `/scan` receiver that calls `handle_rfid_scan`; hardware tap-path guide for admin simulate → Arduino → future KTP host.
+  How it works: teammates paste cloud URL/anon into `supabase.local.js` without Docker; hardware can hit `http://127.0.0.1:8787/scan` so keys stay in `backend/.env` instead of firmware; verified local REST member lookup + RPC after `db reset`.
+
+- **2026-11-02 15:15** — Files: `frontend/admin.html`, `frontend/js/supabase.js`, `supabase/seed.sql`, `supabase/migrations/20261102190000_events_is_archived.sql`, `database/schema.sql`, `database/lead_explore_seed.sql`, `frontend/lead-explore.html`, `docs/LOCAL_SUPABASE.md`, `docs/HARDWARE_TAP_PATH.md`.
+  Built: Admin dashboard polish — team members directory (`@uga.edu`, Vidhu `ADMIN001` admin-priority), Lock→Exit, horizontal check-ins chart from per-event counts, Activate/Deactivate + Archive event actions.
+  How it works: UIDs containing `ADMIN` sort/badge as admin; `is_archived` soft-hides finished events; `deactivateEvent` / `archiveEvent` helpers flip status without auto-picking another live event; chart uses nested `attendance_logs(count)` instead of re-aggregating a short log page.
+
+- **2026-11-02 15:20** — Files: `docs/LOCAL_SUPABASE.md`, `README.md`, `docs/AI_CODING_SKILLS.md`, `frontend/js/supabase.local.js.example`, `frontend/js/supabase.js`, `backend/.env.example`, `database/lead_explore_seed.sql`.
+  Built: Dropped Docker as a supported path — cloud Supabase only; team directory + `is_archived` live in cloud SQL seed; console warn if keys still point at localhost.
+  How it works: setup docs / examples only show `https://….supabase.co`; `database/lead_explore_seed.sql` is the paste-once seed for RLS + members + sample events; `supabase/` CLI folder marked legacy/unused.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

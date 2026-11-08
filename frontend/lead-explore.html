@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tap-In — Lead Explore (Vidhu only)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <!--
+      Team Lead smoke-test page. Does NOT replace teammate pages.
+      Use this to verify Supabase + RPC while planning Week 2.
+    -->
+    <main class="mx-auto max-w-2xl space-y-8 px-5 py-12">
+      <header>
+        <p class="text-sm font-semibold uppercase tracking-wide text-amber-800">
+          Lead only — not a product page
+        </p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight">Explore / smoke test</h1>
+        <p class="mt-3 text-slate-600">
+          Teammate UIs stay untouched. This page checks that your keys, tables,
+          and <code class="rounded bg-white px-1">handle_rfid_scan</code> work so
+          you can plan Week 2.
+        </p>
+      </header>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold">Your explore account</h2>
+        <dl class="mt-4 space-y-2 text-sm">
+          <div class="flex gap-2">
+            <dt class="w-28 font-medium text-slate-500">Email</dt>
+            <dd><code id="acct-email">vidhu.shrivastava@uga.edu</code></dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="w-28 font-medium text-slate-500">RFID UID</dt>
+            <dd><code id="acct-uid">ADMIN001</code></dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="w-28 font-medium text-slate-500">Name</dt>
+            <dd>Vidhu Lead (explore)</dd>
+          </div>
+        </dl>
+        <p class="mt-4 text-sm text-slate-600">
+          Create it by running
+          <code class="rounded bg-slate-100 px-1">database/lead_explore_seed.sql</code>
+          in the Supabase SQL Editor (after schema + RPC).
+        </p>
+      </section>
+
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-3">
+        <h2 class="text-lg font-semibold">Checks</h2>
+        <div class="flex flex-wrap gap-2">
+          <button
+            id="btn-ping"
+            type="button"
+            class="rounded bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-900"
+          >
+            1. Ping Supabase
+          </button>
+          <button
+            id="btn-find"
+            type="button"
+            class="rounded bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-900"
+          >
+            2. Find my explore member
+          </button>
+          <button
+            id="btn-scan"
+            type="button"
+            class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            3. Test scan RPC (ADMIN001)
+          </button>
+        </div>
+        <pre
+          id="out"
+          class="min-h-32 overflow-x-auto rounded-lg bg-slate-900 p-4 text-xs text-slate-100"
+        >Click a button — results show here.</pre>
+      </section>
+
+      <section class="rounded-xl border border-dashed border-slate-300 bg-white/70 p-6">
+        <h2 class="text-lg font-semibold">Open teammate pages (read-only review)</h2>
+        <p class="mt-2 text-sm text-slate-600">
+          Product entry is <a class="underline" href="index.html">index.html</a>.
+          This page is only an optional RPC smoke tool.
+        </p>
+        <ul class="mt-4 list-inside list-disc space-y-1 text-sm text-teal-900">
+          <li><a class="underline" href="index.html">index.html</a> — sign in</li>
+          <li><a class="underline" href="dashboard.html">dashboard.html</a> — member points</li>
+          <li><a class="underline" href="register.html">register.html</a> — card registration</li>
+          <li><a class="underline" href="admin.html">admin.html</a> — events / scan / chart</li>
+          <li><a class="underline" href="profile-settings.html">profile-settings.html</a> — profile cosmetics</li>
+        </ul>
+      </section>
+    </main>
+
+    <script type="module">
+      import { supabase, handleRfidScan } from "./js/supabase.js";
+
+      const out = document.getElementById("out");
+      const EXPLORE_EMAIL = "vidhu.shrivastava@uga.edu";
+      const EXPLORE_UID = "ADMIN001";
+
+      function show(label, payload) {
+        out.textContent =
+          label + "\n\n" + JSON.stringify(payload, null, 2);
+      }
+
+      document.getElementById("btn-ping").addEventListener("click", async () => {
+        out.textContent = "Pinging members table…";
+        const { data, error, count } = await supabase
+          .from("members")
+          .select("id", { count: "exact", head: true });
+        show("Ping result", {
+          ok: !error,
+          error: error ? error.message : null,
+          memberRowCount: count,
+          note: error
+            ? "If this fails, run schema.sql + lead_explore_seed.sql and check supabase.local.js"
+            : "Supabase reachable with your anon key.",
+        });
+      });
+
+      document.getElementById("btn-find").addEventListener("click", async () => {
+        out.textContent = "Looking up explore member…";
+        const { data, error } = await supabase
+          .from("members")
+          .select("id, full_name, email, rfid_uid, total_points")
+          .eq("email", EXPLORE_EMAIL)
+          .maybeSingle();
+        show("Explore member", {
+          error: error ? error.message : null,
+          member: data,
+          hint: data
+            ? "Account is ready."
+            : "Run database/lead_explore_seed.sql in Supabase.",
+        });
+      });
+
+      document.getElementById("btn-scan").addEventListener("click", async () => {
+        out.textContent = "Calling handle_rfid_scan…";
+        const { data, error } = await handleRfidScan(EXPLORE_UID);
+        show("Scan RPC", {
+          error: error ? error.message : null,
+          data,
+        });
+      });
+    </script>
+  </body>
+</html>

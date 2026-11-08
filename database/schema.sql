@@ -25,7 +25,8 @@ CREATE TABLE events (
   event_name text NOT NULL,
   event_date date NOT NULL,
   point_value int4 NOT NULL,
-  is_active boolean NOT NULL DEFAULT false
+  is_active boolean NOT NULL DEFAULT false,
+  is_archived boolean NOT NULL DEFAULT false
 );
 
 -- attendance_logs: one row per successful tap

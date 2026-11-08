@@ -20,7 +20,7 @@
 
 # Progress — Database & Onboarding
 
-**Name:** Jayati/Kailash  
+**Name:** Jayati
 **Role:** MIS — Database Schema & Card Registration  
 **Branch:** `branch-db-onboarding`  
 **Owns:** `/database/schema.sql`, `frontend/register.html` (and this progress file only under docs)  
@@ -33,6 +33,13 @@
 <!-- AI: append new bullets below. Do not delete older entries. -->
 
 - *(No AI entries yet — first work session will add the first timestamped bullet here.)*
+- **2026-10-19 01:01** — Files: `database/schema.sql`, `frontend/register.html`.
+	Built: members/events/attendance tables, FK indexes, one-check-in-per-event constraint, five sample INSERT statements, and an enabled static registration form.
+	How it works: UUID keys and foreign keys connect taps to seeded members and events; browser validation checks the form and displays a demo-only status without writing to Supabase.
+
+- **2026-10-28 19:05** — Files: `frontend/register.html`.
+	Built: Restyled the card registration page to match Tap-IN member UI (green/mint/teal light gradient, slate dark theme, logo mark, emerald cards/inputs, gradient submit button, theme toggle, visible field errors).
+	How it works: Same Week-1 static form (full name, email, RFID hex + `preventDefault`); only Tailwind/classes and light validation messaging changed — no schema or Supabase writes.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

@@ -1,0 +1,3 @@
+-- LEGACY / UNUSED — Tap-In is cloud Supabase only.
+-- Use database/lead_explore_seed.sql in the cloud SQL Editor instead.
+-- See docs/LOCAL_SUPABASE.md and supabase/README.md.

@@ -3,20 +3,441 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="View your Tap-In attendance points and history."
+    />
     <title>Tap-In — Member Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <style>
+      /* Fade page colors when the light/dark theme changes. */
+      html.theme-transition body,
+      html.theme-transition body * {
+        transition-property: color, background-color, border-color;
+        transition-duration: 1500ms;
+        transition-timing-function: ease;
+      }
+    </style>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Owner branch: branch-member-ui — placeholder so Git tracks this file -->
-    <main class="mx-auto max-w-3xl px-6 py-16">
-      <h1 class="text-3xl font-bold tracking-tight">Member Dashboard</h1>
-      <p class="mt-2 text-slate-600">
-        Placeholder — show points, recent taps, and event status here.
-      </p>
-      <p class="mt-6 text-sm">
-        <a class="text-sky-700 underline" href="index.html">← Back home</a>
-      </p>
+  <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <!-- The top navigation includes a menu for account and display options. -->
+    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <nav
+        aria-label="Main navigation"
+        class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6"
+      >
+        <a href="index.html" class="text-lg font-bold tracking-tight text-teal-800 dark:text-teal-300">
+          Tap-In
+        </a>
+        <div class="relative">
+          <button
+            id="account-menu-button"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="account-menu"
+            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            <span
+              id="menu-avatar"
+              aria-hidden="true"
+              class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-xs font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+            >
+              <span class="avatar-initials">…</span>
+              <img class="avatar-image hidden h-full w-full object-cover" alt="" />
+            </span>
+            <span class="hidden sm:inline">Account</span>
+            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.22 7.47a.75.75 0 0 1 1.06 0L10 11.19l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <div
+            id="account-menu"
+            role="menu"
+            aria-labelledby="account-menu-button"
+            class="absolute right-0 z-10 mt-2 hidden w-52 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          >
+            <button
+              id="theme-toggle"
+              type="button"
+              role="menuitem"
+              class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Switch to dark mode
+            </button>
+            <a
+              href="profile-settings.html"
+              role="menuitem"
+              class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Profile settings
+            </a>
+            <button
+              id="sign-out-button"
+              type="button"
+              role="menuitem"
+              class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main holds the member summary and attendance history. -->
+    <main class="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
+      <section aria-labelledby="welcome-heading">
+        <p class="text-sm font-semibold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+          Member profile
+        </p>
+        <h1
+          id="welcome-heading"
+          class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
+        >
+          Welcome back
+        </h1>
+        <p class="mt-2 text-slate-600 dark:text-slate-300">
+          Here are your attendance points and recent event visits.
+        </p>
+      </section>
+
+      <!-- Profile and points are grouped in a single responsive summary card. -->
+      <section
+        aria-labelledby="points-heading"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+      >
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div class="flex min-w-0 flex-1 items-center gap-4">
+            <div
+              id="profile-avatar"
+              aria-hidden="true"
+              class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+            >
+              <span class="avatar-initials">…</span>
+              <img class="avatar-image hidden h-full w-full object-cover" alt="" />
+            </div>
+            <div class="min-w-0">
+              <h2 id="display-profile-name" class="truncate text-lg font-semibold">
+                Loading…
+              </h2>
+              <p
+                id="display-preferred-name"
+                class="mt-1 text-sm text-slate-500 dark:text-slate-400"
+              >
+                Tap-In member
+              </p>
+              <p
+                id="display-member-email"
+                class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400"
+              ></p>
+            </div>
+          </div>
+          <div class="sm:w-64">
+            <div class="flex items-baseline justify-between gap-3">
+              <h2 id="points-heading" class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Attendance points
+              </h2>
+              <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">
+                <span id="points-value" class="text-2xl">0</span>
+                <span class="text-slate-500 dark:text-slate-400">/ 100</span>
+              </p>
+            </div>
+            <div
+              id="points-bar-wrap"
+              class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"
+              role="progressbar"
+              aria-label="Attendance points progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div
+                id="points-bar"
+                class="h-full rounded-full bg-teal-700"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p
+              id="points-goal-text"
+              class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+            >
+              Loading points…
+            </p>
+          </div>
+        </div>
+        <p
+          id="profile-load-status"
+          class="mt-4 text-sm text-slate-600 dark:text-slate-300"
+          role="status"
+          aria-live="polite"
+        >
+          Loading your membership…
+        </p>
+      </section>
+
+      <!-- The scrollable table keeps all history columns usable on small screens. -->
+      <section
+        aria-labelledby="history-heading"
+        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div class="px-6 py-5 sm:px-8">
+          <h2 id="history-heading" class="text-lg font-semibold">
+            Previous attendance
+          </h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Live scan timestamps from Supabase attendance logs.
+          </p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[32rem] text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-semibold sm:px-8">Scanned at</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Event</th>
+                <th scope="col" class="px-6 py-3 text-right font-semibold sm:px-8">
+                  Points
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="attendance-body"
+              class="divide-y divide-slate-100 dark:divide-slate-800"
+            >
+              <tr>
+                <td
+                  colspan="3"
+                  class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8"
+                >
+                  Loading attendance…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
-    <!-- <script type="module" src="js/supabase.js"></script> -->
+
+    <!-- Vanilla JS: theme/menu (Turner) + live Supabase data. -->
+    <script type="module">
+      import {
+        getMemberSession,
+        clearMemberSession,
+        getMemberById,
+        getMemberAttendance,
+      } from "./js/supabase.js";
+
+      const menuButton = document.getElementById("account-menu-button");
+      const accountMenu = document.getElementById("account-menu");
+      const themeToggle = document.getElementById("theme-toggle");
+      const signOutButton = document.getElementById("sign-out-button");
+      const statusEl = document.getElementById("profile-load-status");
+      let themeTransitionTimer;
+
+      const session = getMemberSession();
+      if (!session) {
+        window.location.href = "index.html";
+      }
+
+      /**
+       * Apply cosmetic preferred name / picture from Turner's profile-settings
+       * localStorage, layered on top of the live Supabase full_name.
+       */
+      function showProfile(profileName, preferredFromStorage) {
+        const preferredName =
+          typeof preferredFromStorage === "string"
+            ? preferredFromStorage.trim()
+            : "";
+        const displayName =
+          typeof profileName === "string" && profileName.trim()
+            ? profileName.trim()
+            : "Member";
+        const initials = displayName
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((part) => part.charAt(0).toUpperCase())
+          .join("");
+
+        document.getElementById("display-profile-name").textContent = displayName;
+        document.getElementById("welcome-heading").textContent =
+          `Welcome back, ${preferredName || displayName.split(/\s+/)[0]}`;
+        document.getElementById("display-preferred-name").textContent =
+          preferredName ? `Preferred name: ${preferredName}` : "Tap-In member";
+
+        document.querySelectorAll(".avatar-initials").forEach((element) => {
+          element.textContent = initials || "?";
+          element.classList.remove("hidden");
+        });
+      }
+
+      function applyCosmeticPicture(picture) {
+        document.querySelectorAll(".avatar-image").forEach((image) => {
+          if (typeof picture === "string" && picture.startsWith("data:image/")) {
+            image.src = picture;
+            image.classList.remove("hidden");
+            image.previousElementSibling.classList.add("hidden");
+          } else {
+            image.removeAttribute("src");
+            image.classList.add("hidden");
+            image.previousElementSibling.classList.remove("hidden");
+          }
+        });
+      }
+
+      function renderPoints(totalPoints) {
+        const goal = 100;
+        const points = Number(totalPoints) || 0;
+        const capped = Math.min(points, goal);
+        const pct = Math.round((capped / goal) * 100);
+
+        document.getElementById("points-value").textContent = String(points);
+        document.getElementById("points-bar").style.width = `${pct}%`;
+        document
+          .getElementById("points-bar-wrap")
+          .setAttribute("aria-valuenow", String(capped));
+        document.getElementById("points-goal-text").textContent =
+          points >= goal
+            ? "Goal reached — nice work!"
+            : `${goal - points} points to your ${goal}-point goal`;
+      }
+
+      function renderAttendance(rows) {
+        const body = document.getElementById("attendance-body");
+        if (!rows.length) {
+          body.innerHTML = `
+            <tr>
+              <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8">
+                No attendance yet. Tap in at an active event to see history here.
+              </td>
+            </tr>`;
+          return;
+        }
+
+        body.innerHTML = rows
+          .map((row) => {
+            const when = row.scanned_at
+              ? new Date(row.scanned_at).toLocaleString()
+              : "—";
+            const eventName = row.events?.event_name || "Unknown event";
+            const pts = row.events?.point_value ?? "—";
+            return `
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">${when}</td>
+                <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">${eventName}</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">+${pts}</td>
+              </tr>`;
+          })
+          .join("");
+      }
+
+      async function loadDashboard() {
+        const { data: member, error: memberError } = await getMemberById(session.id);
+        if (memberError || !member) {
+          statusEl.textContent =
+            "Could not load your member row. Sign in again or check Supabase.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+          return;
+        }
+
+        let preferredName = "";
+        let picture = "";
+        try {
+          const savedProfile = localStorage.getItem("tapInMemberProfile");
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            if (profile && typeof profile === "object") {
+              preferredName =
+                typeof profile.preferredName === "string"
+                  ? profile.preferredName
+                  : "";
+              picture =
+                typeof profile.picture === "string" ? profile.picture : "";
+            }
+          }
+        } catch (error) {
+          console.error("Could not load saved profile settings.", error);
+        }
+
+        showProfile(member.full_name, preferredName);
+        applyCosmeticPicture(picture);
+        document.getElementById("display-member-email").textContent = member.email;
+        renderPoints(member.total_points);
+
+        const { data: logs, error: logsError } = await getMemberAttendance(member.id);
+        if (logsError) {
+          statusEl.textContent =
+            "Member loaded, but attendance history failed to load.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+          renderAttendance([]);
+          return;
+        }
+
+        renderAttendance(logs);
+        statusEl.textContent = `Signed in as ${member.email}`;
+        statusEl.className = "mt-4 text-sm text-slate-600 dark:text-slate-300";
+      }
+
+      try {
+        if (localStorage.getItem("tapInTheme") === "dark") {
+          document.documentElement.classList.add("dark");
+          themeToggle.textContent = "Switch to light mode";
+        }
+      } catch (error) {
+        console.error("Could not load the display theme preference.", error);
+      }
+
+      function closeAccountMenu() {
+        accountMenu.classList.add("hidden");
+        menuButton.setAttribute("aria-expanded", "false");
+      }
+
+      menuButton.addEventListener("click", () => {
+        const isOpen = menuButton.getAttribute("aria-expanded") === "true";
+        menuButton.setAttribute("aria-expanded", String(!isOpen));
+        accountMenu.classList.toggle("hidden", isOpen);
+      });
+
+      themeToggle.addEventListener("click", () => {
+        const page = document.documentElement;
+        page.classList.add("theme-transition");
+        const isDarkMode = page.classList.toggle("dark");
+        themeToggle.textContent = isDarkMode
+          ? "Switch to light mode"
+          : "Switch to dark mode";
+        try {
+          localStorage.setItem("tapInTheme", isDarkMode ? "dark" : "light");
+        } catch (error) {
+          console.error("Could not save the display theme preference.", error);
+        }
+
+        clearTimeout(themeTransitionTimer);
+        themeTransitionTimer = setTimeout(() => {
+          page.classList.remove("theme-transition");
+        }, 1500);
+      });
+
+      signOutButton.addEventListener("click", () => {
+        clearMemberSession();
+        window.location.href = "index.html";
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("#account-menu-button, #account-menu")) {
+          closeAccountMenu();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeAccountMenu();
+          menuButton.focus();
+        }
+      });
+
+      loadDashboard();
+    </script>
   </body>
 </html>

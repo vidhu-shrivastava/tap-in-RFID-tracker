@@ -5,22 +5,677 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tap-In — Exec Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN available when you build analytics on your branch -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Owner branch: branch-admin-analytics — placeholder so Git tracks this file -->
-    <main class="mx-auto max-w-4xl px-6 py-16">
-      <h1 class="text-3xl font-bold tracking-tight">Exec Admin Dashboard</h1>
+    <!-- Gate: password from gitignored admin.local.js -->
+    <div
+      id="login-gate"
+      class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16"
+    >
+      <h1 class="text-3xl font-bold tracking-tight">Exec Admin</h1>
       <p class="mt-2 text-slate-600">
-        Placeholder — events, attendance analytics, and Chart.js / Retool views go here.
+        Enter the private admin password from
+        <code class="rounded bg-slate-100 px-1">admin.local.js</code>
+        (gitignored — share that file offline with the team).
       </p>
-      <div class="mt-8 rounded border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-        Chart / analytics area
-      </div>
+      <form id="admin-login-form" class="mt-8 space-y-4">
+        <div>
+          <label for="admin-password" class="block text-sm font-semibold"
+            >Admin password</label
+          >
+          <input
+            id="admin-password"
+            type="password"
+            autocomplete="current-password"
+            required
+            class="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full rounded bg-teal-800 px-4 py-3 font-semibold text-white hover:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2"
+        >
+          Unlock admin
+        </button>
+        <p
+          id="login-status"
+          class="min-h-5 text-sm text-slate-600"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </form>
       <p class="mt-6 text-sm">
-        <a class="text-sky-700 underline" href="index.html">← Back home</a>
+        <a class="text-teal-800 underline" href="index.html"
+          >← Back to member sign-in</a
+        >
       </p>
-    </main>
+    </div>
+
+    <!-- Dashboard (shown after unlock) -->
+    <div id="admin-app" class="hidden">
+      <header class="border-b border-slate-200 bg-white">
+        <nav
+          class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6"
+        >
+          <p class="text-lg font-bold tracking-tight text-teal-800">
+            Tap-In Admin
+          </p>
+          <div class="flex items-center gap-3 text-sm">
+            <a class="text-slate-600 underline" href="index.html">Member home</a>
+            <a class="text-slate-600 underline" href="register.html"
+              >Register</a
+            >
+            <button
+              id="admin-lock"
+              type="button"
+              class="rounded border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-50"
+            >
+              Exit
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      <main class="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:px-6 sm:py-12">
+        <p
+          id="admin-status"
+          class="text-sm text-slate-600"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+        <!-- Create + activate events -->
+        <section
+          aria-labelledby="events-heading"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="events-heading" class="text-xl font-semibold">Events</h2>
+          <p class="mt-1 text-sm text-slate-600">
+            Activate one event for scans. When finished, deactivate it or archive
+            it so it leaves the live list.
+          </p>
+
+          <form
+            id="create-event-form"
+            class="mt-6 grid gap-4 sm:grid-cols-4"
+          >
+            <div class="sm:col-span-2">
+              <label for="event_name" class="block text-sm font-semibold"
+                >Name</label
+              >
+              <input
+                id="event_name"
+                required
+                maxlength="120"
+                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                placeholder="Chapter Meeting"
+              />
+            </div>
+            <div>
+              <label for="event_date" class="block text-sm font-semibold"
+                >Date</label
+              >
+              <input
+                id="event_date"
+                type="date"
+                required
+                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label for="point_value" class="block text-sm font-semibold"
+                >Points</label
+              >
+              <input
+                id="point_value"
+                type="number"
+                min="1"
+                value="10"
+                required
+                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+              />
+            </div>
+            <div class="sm:col-span-4">
+              <button
+                type="submit"
+                class="rounded bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-900"
+              >
+                Create event
+              </button>
+            </div>
+          </form>
+
+          <div class="mt-6 overflow-x-auto">
+            <table class="w-full min-w-[36rem] text-left text-sm">
+              <thead
+                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+              >
+                <tr>
+                  <th class="px-3 py-2">Name</th>
+                  <th class="px-3 py-2">Date</th>
+                  <th class="px-3 py-2">Points</th>
+                  <th class="px-3 py-2">Status</th>
+                  <th class="w-44 px-2 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="events-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Chart.js attendance by event -->
+        <section
+          aria-labelledby="chart-heading"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="chart-heading" class="text-xl font-semibold">
+            Check-ins per event
+          </h2>
+          <p class="mt-1 text-sm text-slate-600">
+            Live events only — totals from attendance logs (Chart.js).
+          </p>
+          <div class="relative mt-6 h-64 w-full sm:h-72">
+            <canvas
+              id="attendance-chart"
+              aria-label="Attendance bar chart"
+            ></canvas>
+          </div>
+          <p
+            id="chart-empty"
+            class="mt-4 hidden text-center text-sm text-slate-500"
+          >
+            No live events yet — create one above, then run a test scan.
+          </p>
+        </section>
+
+        <!-- Manual scan smoke test -->
+        <section
+          aria-labelledby="scan-heading"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="scan-heading" class="text-xl font-semibold">
+            Test RFID scan
+          </h2>
+          <p class="mt-1 text-sm text-slate-600">
+            Calls
+            <code class="rounded bg-slate-100 px-1">handle_rfid_scan</code>
+            with a UID (same path hardware will use later).
+          </p>
+          <form
+            id="scan-form"
+            class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end"
+          >
+            <div class="flex-1">
+              <label for="scan_uid" class="block text-sm font-semibold"
+                >RFID UID</label
+              >
+              <input
+                id="scan_uid"
+                required
+                pattern="[A-Za-z0-9]+"
+                class="mt-1 w-full rounded border border-slate-300 px-3 py-2 font-mono uppercase"
+                placeholder="ADMIN001 or A1B2C3D4"
+              />
+            </div>
+            <button
+              type="submit"
+              class="rounded bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Run scan RPC
+            </button>
+          </form>
+          <pre
+            id="scan-result"
+            class="mt-4 min-h-16 overflow-x-auto rounded bg-slate-900 p-4 text-xs text-slate-100"
+          >
+Results show here after a scan.</pre
+          >
+        </section>
+
+        <!-- Members -->
+        <section
+          aria-labelledby="members-heading"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="members-heading" class="text-xl font-semibold">Members</h2>
+          <p class="mt-1 text-sm text-slate-600">
+            UIDs containing
+            <code class="rounded bg-slate-100 px-1">ADMIN</code>
+            show as admin priority. Regular cards register via
+            <a class="text-teal-800 underline" href="register.html">register</a>.
+          </p>
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full min-w-[36rem] text-left text-sm">
+              <thead
+                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+              >
+                <tr>
+                  <th class="px-3 py-2">Name</th>
+                  <th class="px-3 py-2">Email</th>
+                  <th class="px-3 py-2">RFID</th>
+                  <th class="px-3 py-2">Priority</th>
+                  <th class="px-3 py-2 text-right">Points</th>
+                </tr>
+              </thead>
+              <tbody
+                id="members-body"
+                class="divide-y divide-slate-100"
+              ></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="logs-heading"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 id="logs-heading" class="text-xl font-semibold">
+            Recent attendance
+          </h2>
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full min-w-[36rem] text-left text-sm">
+              <thead
+                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+              >
+                <tr>
+                  <th class="px-3 py-2">When</th>
+                  <th class="px-3 py-2">Member</th>
+                  <th class="px-3 py-2">Event</th>
+                  <th class="px-3 py-2 text-right">Points</th>
+                </tr>
+              </thead>
+              <tbody id="logs-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import { ADMIN_PASSWORD } from "./js/admin.local.js";
+      import {
+        listEvents,
+        createEvent,
+        setActiveEvent,
+        deactivateEvent,
+        archiveEvent,
+        listMembers,
+        isAdminRfid,
+        listEventCheckInCounts,
+        listRecentAttendance,
+        handleRfidScan,
+      } from "./js/supabase.js";
+
+      const ADMIN_SESSION_KEY = "tapInAdminUnlocked";
+      const gate = document.getElementById("login-gate");
+      const app = document.getElementById("admin-app");
+      const loginStatus = document.getElementById("login-status");
+      const adminStatus = document.getElementById("admin-status");
+      let attendanceChart = null;
+
+      function isUnlocked() {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      }
+
+      function unlock() {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+        refreshAll();
+      }
+
+      function lock() {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        app.classList.add("hidden");
+        gate.classList.remove("hidden");
+      }
+
+      document
+        .getElementById("admin-login-form")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+          const entered = document.getElementById("admin-password").value;
+          if (entered !== ADMIN_PASSWORD) {
+            loginStatus.textContent = "Wrong password.";
+            loginStatus.className = "min-h-5 text-sm text-rose-700";
+            return;
+          }
+          loginStatus.textContent = "";
+          unlock();
+        });
+
+      document.getElementById("admin-lock").addEventListener("click", lock);
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function eventStatusHtml(ev) {
+        if (ev.is_active) {
+          return '<span class="font-semibold text-teal-800">Active</span>';
+        }
+        if (ev.is_archived) {
+          return '<span class="font-medium text-slate-500">Archived</span>';
+        }
+        return '<span class="text-slate-500">Inactive</span>';
+      }
+
+      function eventActionsHtml(ev) {
+        if (ev.is_archived) {
+          return `<span class="text-xs text-slate-400">Done</span>`;
+        }
+
+        const archiveBtn = `<button type="button" data-archive="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-slate-300 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">Archive</button>`;
+
+        if (ev.is_active) {
+          return `<div class="flex max-w-[10.5rem] flex-wrap items-center justify-end gap-1.5">
+            ${archiveBtn}
+            <button type="button" data-deactivate="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-amber-700 px-2 py-1 text-[11px] font-semibold text-amber-900 hover:bg-amber-50">Deactivate</button>
+          </div>`;
+        }
+
+        return `<div class="flex max-w-[10.5rem] flex-wrap items-center justify-end gap-1.5">
+          ${archiveBtn}
+          <button type="button" data-activate="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-teal-700 px-2 py-1 text-[11px] font-semibold text-teal-800 hover:bg-teal-50">Activate</button>
+        </div>`;
+      }
+
+      function updateChart(rows) {
+        const emptyEl = document.getElementById("chart-empty");
+        const canvas = document.getElementById("attendance-chart");
+        const labels = (rows || []).map((row) => row.event_name);
+        const values = (rows || []).map((row) => row.check_ins);
+
+        if (!labels.length) {
+          emptyEl.classList.remove("hidden");
+          canvas.classList.add("hidden");
+          if (attendanceChart) {
+            attendanceChart.destroy();
+            attendanceChart = null;
+          }
+          return;
+        }
+
+        emptyEl.classList.add("hidden");
+        canvas.classList.remove("hidden");
+
+        if (attendanceChart) {
+          attendanceChart.data.labels = labels;
+          attendanceChart.data.datasets[0].data = values;
+          attendanceChart.update();
+          return;
+        }
+
+        attendanceChart = new Chart(canvas, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Check-ins",
+                data: values,
+                backgroundColor: "rgba(15, 118, 110, 0.7)",
+                borderColor: "rgb(15, 118, 110)",
+                borderWidth: 1,
+                borderRadius: 4,
+                maxBarThickness: 28,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) =>
+                    `${ctx.parsed.x} check-in${ctx.parsed.x === 1 ? "" : "s"}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { precision: 0, stepSize: 1 },
+                grid: { color: "rgba(148, 163, 184, 0.25)" },
+              },
+              y: {
+                ticks: {
+                  autoSkip: false,
+                  font: { size: 11 },
+                  callback(value) {
+                    const label = this.getLabelForValue(value);
+                    return label.length > 28
+                      ? `${label.slice(0, 26)}…`
+                      : label;
+                  },
+                },
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+
+      async function refreshChart() {
+        const { data, error } = await listEventCheckInCounts();
+        if (error) {
+          updateChart([]);
+          document.getElementById("chart-empty").textContent =
+            `Could not load chart: ${error.message}`;
+          document.getElementById("chart-empty").classList.remove("hidden");
+          return;
+        }
+        updateChart(data);
+      }
+
+      async function refreshEvents() {
+        const { data, error } = await listEvents();
+        const body = document.getElementById("events-body");
+        if (error) {
+          body.innerHTML = `<tr><td colspan="5" class="px-3 py-4 text-rose-700">Could not load events: ${escapeHtml(error.message)}</td></tr>`;
+          return;
+        }
+        if (!data.length) {
+          body.innerHTML = `<tr><td colspan="5" class="px-3 py-4 text-slate-500">No events yet — create one above.</td></tr>`;
+          return;
+        }
+        body.innerHTML = data
+          .map(
+            (ev) => `
+          <tr class="${ev.is_archived ? "bg-slate-50/80 text-slate-500" : ""}">
+            <td class="max-w-[12rem] truncate px-3 py-2 font-medium" title="${escapeHtml(ev.event_name)}">${escapeHtml(ev.event_name)}</td>
+            <td class="whitespace-nowrap px-3 py-2">${escapeHtml(ev.event_date)}</td>
+            <td class="px-3 py-2">${escapeHtml(ev.point_value)}</td>
+            <td class="px-3 py-2">${eventStatusHtml(ev)}</td>
+            <td class="px-2 py-2 text-right">${eventActionsHtml(ev)}</td>
+          </tr>`
+          )
+          .join("");
+
+        body.querySelectorAll("[data-activate]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            adminStatus.textContent = "Activating event…";
+            const { error: actError } = await setActiveEvent(
+              btn.getAttribute("data-activate")
+            );
+            if (actError) {
+              adminStatus.textContent = `Activate failed: ${actError.message}`;
+              adminStatus.className = "text-sm text-rose-700";
+              return;
+            }
+            adminStatus.textContent =
+              "Event activated (others deactivated).";
+            adminStatus.className = "text-sm text-teal-800";
+            refreshEvents();
+            refreshChart();
+          });
+        });
+
+        body.querySelectorAll("[data-deactivate]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            adminStatus.textContent = "Deactivating event…";
+            const { error: deactError } = await deactivateEvent(
+              btn.getAttribute("data-deactivate")
+            );
+            if (deactError) {
+              adminStatus.textContent = `Deactivate failed: ${deactError.message}`;
+              adminStatus.className = "text-sm text-rose-700";
+              return;
+            }
+            adminStatus.textContent = "Event deactivated.";
+            adminStatus.className = "text-sm text-teal-800";
+            refreshEvents();
+            refreshChart();
+          });
+        });
+
+        body.querySelectorAll("[data-archive]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            adminStatus.textContent = "Archiving event…";
+            const { error: archError } = await archiveEvent(
+              btn.getAttribute("data-archive")
+            );
+            if (archError) {
+              adminStatus.textContent = `Archive failed: ${archError.message}`;
+              adminStatus.className = "text-sm text-rose-700";
+              return;
+            }
+            adminStatus.textContent = "Event archived.";
+            adminStatus.className = "text-sm text-teal-800";
+            refreshEvents();
+            refreshChart();
+          });
+        });
+      }
+
+      async function refreshMembers() {
+        const { data, error } = await listMembers();
+        const body = document.getElementById("members-body");
+        if (error) {
+          body.innerHTML = `<tr><td colspan="5" class="px-3 py-4 text-rose-700">${escapeHtml(error.message)}</td></tr>`;
+          return;
+        }
+        if (!data.length) {
+          body.innerHTML = `<tr><td colspan="5" class="px-3 py-4 text-slate-500">No members yet — use register.html.</td></tr>`;
+          return;
+        }
+        body.innerHTML = data
+          .map((m) => {
+            const admin = isAdminRfid(m.rfid_uid);
+            return `
+          <tr>
+            <td class="px-3 py-2 font-medium">${escapeHtml(m.full_name)}</td>
+            <td class="px-3 py-2">${escapeHtml(m.email)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${escapeHtml(m.rfid_uid)}</td>
+            <td class="px-3 py-2">${
+              admin
+                ? '<span class="rounded bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-900">Admin</span>'
+                : '<span class="text-xs text-slate-500">Member</span>'
+            }</td>
+            <td class="px-3 py-2 text-right font-semibold text-teal-800">${escapeHtml(m.total_points)}</td>
+          </tr>`;
+          })
+          .join("");
+      }
+
+      async function refreshLogs() {
+        const { data, error } = await listRecentAttendance(50);
+        const body = document.getElementById("logs-body");
+        if (error) {
+          body.innerHTML = `<tr><td colspan="4" class="px-3 py-4 text-rose-700">${escapeHtml(error.message)}</td></tr>`;
+          return;
+        }
+        if (!data.length) {
+          body.innerHTML = `<tr><td colspan="4" class="px-3 py-4 text-slate-500">No attendance logs yet.</td></tr>`;
+          return;
+        }
+        body.innerHTML = data
+          .map((row) => {
+            const when = row.scanned_at
+              ? new Date(row.scanned_at).toLocaleString()
+              : "—";
+            const member = row.members?.full_name || "—";
+            const eventName = row.events?.event_name || "—";
+            const pts = row.events?.point_value ?? "—";
+            return `
+              <tr>
+                <td class="px-3 py-2">${escapeHtml(when)}</td>
+                <td class="px-3 py-2">${escapeHtml(member)}</td>
+                <td class="px-3 py-2">${escapeHtml(eventName)}</td>
+                <td class="px-3 py-2 text-right">+${escapeHtml(pts)}</td>
+              </tr>`;
+          })
+          .join("");
+      }
+
+      async function refreshAll() {
+        adminStatus.textContent = "Loading admin data…";
+        await Promise.all([
+          refreshEvents(),
+          refreshMembers(),
+          refreshLogs(),
+          refreshChart(),
+        ]);
+        adminStatus.textContent = "Admin data loaded.";
+        adminStatus.className = "text-sm text-slate-600";
+      }
+
+      document
+        .getElementById("create-event-form")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          adminStatus.textContent = "Creating event…";
+          const { error } = await createEvent({
+            event_name: document.getElementById("event_name").value,
+            event_date: document.getElementById("event_date").value,
+            point_value: document.getElementById("point_value").value,
+          });
+          if (error) {
+            adminStatus.textContent = `Create failed: ${error.message}`;
+            adminStatus.className = "text-sm text-rose-700";
+            return;
+          }
+          event.target.reset();
+          document.getElementById("point_value").value = "10";
+          adminStatus.textContent =
+            "Event created (inactive). Activate it when ready.";
+          adminStatus.className = "text-sm text-teal-800";
+          refreshEvents();
+        });
+
+      document
+        .getElementById("scan-form")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const uid = document.getElementById("scan_uid").value;
+          document.getElementById("scan-result").textContent =
+            "Calling handle_rfid_scan…";
+          const { data, error } = await handleRfidScan(uid);
+          document.getElementById("scan-result").textContent = error
+            ? JSON.stringify({ error: error.message }, null, 2)
+            : JSON.stringify(data, null, 2);
+          refreshMembers();
+          refreshLogs();
+          refreshChart();
+        });
+
+      // Default date input to today for convenience.
+      const dateInput = document.getElementById("event_date");
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+
+      if (isUnlocked()) {
+        unlock();
+      }
+    </script>
   </body>
 </html>

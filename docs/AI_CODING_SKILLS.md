@@ -27,6 +27,8 @@
 ├── docs/
 │   ├── AI_CODING_SKILLS.md        # Shared rules (Team Lead)
 │   ├── GIT_AND_COPILOT_GUIDE.md   # Shared guide (Team Lead)
+│   ├── LOCAL_SUPABASE.md          # Cloud Supabase setup only (no Docker)
+│   ├── HARDWARE_TAP_PATH.md       # Arduino → scan RPC / backend receive
 │   ├── PROGRESS_TRACKER.md        # Index only — do not log work here
 │   └── progress/                  # Per-branch logs (merge-safe)
 │       ├── backend-core.md
@@ -45,6 +47,8 @@
 │   ├── admin.html                 # Exec admin dashboard & analytics
 │   └── js/
 │       └── supabase.js            # Shared Supabase client helpers
+├── backend/
+│   └── receive_scan.py            # Thin POST /scan for hardware (Lead)
 └── hardware/
     └── tap_in_scanner/
         └── tap_in_scanner.ino     # Arduino UNO R4 WiFi + RC522 + OLED + Buzzer
@@ -52,16 +56,15 @@
 
 ### Branch Ownership
 
-| Branch | Role | Files |
-|--------|------|-------|
-| `branch-backend-core` | Vidhu | `frontend/js/supabase.js`, `database/rpc_handle_scan.sql`, shared docs guides, `docs/progress/backend-core.md`, backend logic |
-| `branch-hardware` | Kathleen | `/hardware/`, `docs/progress/hardware.md` |
-| `branch-member-ui` | Turner | `frontend/index.html`, `frontend/dashboard.html`, `docs/progress/member-ui.md` |
-| `branch-db-onboarding` | Jayati/Kailash | `database/schema.sql` only (do **not** delete other `/database/` files), `frontend/register.html`, `docs/progress/db-onboarding.md` |
-| `branch-admin-analytics` | Jayati/Kailash | `frontend/admin.html`, `docs/progress/admin-analytics.md` |
+| Branch                   | Role     | Files                                                                                                                                     |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `branch-backend-core`    | Vidhu    | `frontend/js/supabase.js`, `database/rpc_handle_scan.sql`, `backend/`, shared docs guides, `docs/progress/backend-core.md`, backend logic |
+| `branch-hardware`        | Kathleen | `/hardware/`, `docs/progress/hardware.md`                                                                                                 |
+| `branch-member-ui`       | Turner   | `frontend/index.html`, `frontend/dashboard.html`, `docs/progress/member-ui.md`                                                            |
+| `branch-db-onboarding`   | Jayati   | `database/schema.sql` only (do **not** delete other `/database/` files), `frontend/register.html`, `docs/progress/db-onboarding.md`       |
+| `branch-admin-analytics` | Kailash  | `frontend/admin.html`, `docs/progress/admin-analytics.md`                                                                                 |
 
-**Merge-safe rule:** Each person edits only their code paths + their own `docs/progress/<file>.md`. Shared guides and `docs/PROGRESS_TRACKER.md` (index) are Team Lead–owned so parallel branches do not conflict.
----
+## **Merge-safe rule:** Each person edits only their code paths + their own `docs/progress/<file>.md`. Shared guides and `docs/PROGRESS_TRACKER.md` (index) are Team Lead–owned so parallel branches do not conflict.
 
 ## Database Schema Reference (Supabase PostgreSQL)
 
@@ -118,9 +121,9 @@ After completing code changes (and whenever a teammate is about to commit/push),
 
 Each entry must include:
 
-1. Files modified/created  
-2. Features / UI / SQL / hardware functions built  
-3. Brief under-the-hood technical explanation  
+1. Files modified/created
+2. Features / UI / SQL / hardware functions built
+3. Brief under-the-hood technical explanation
 
 **Never** delete past entries. **Never** write the Human Summary section.
 
@@ -178,9 +181,10 @@ To prevent code degradation, memory rot, and hallucinated functions:
 
 | Layer | Responsibility | Where it lives |
 |-------|----------------|----------------|
-| Hardware | Read RFID UID, show OLED feedback, beep, send UID to backend path chosen by Lead | `hardware/tap_in_scanner/` |
+| Hardware | Read RFID UID, show OLED feedback, beep, send UID to receive URL | `hardware/tap_in_scanner/` |
 | Data | Tables, constraints, indexes, RLS policies | `database/schema.sql` + Supabase dashboard |
 | Shared client | Supabase URL/anon key init + reusable query helpers | `frontend/js/supabase.js` |
+| Scan receive | Thin HTTP `POST /scan` for Arduino → `handle_rfid_scan` (folder in this repo, not a second GitHub remote) | `backend/` |
 | Member UI | Landing + personal points/attendance views | `frontend/index.html`, `frontend/dashboard.html` |
 | Onboarding | Register member + RFID UID | `frontend/register.html` |
 | Admin | Events, analytics, Chart.js / Retool views | `frontend/admin.html` |

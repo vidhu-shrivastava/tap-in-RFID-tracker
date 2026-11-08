@@ -4,13 +4,14 @@ Each branch has its **own** progress file under `docs/progress/`. That way logs 
 
 **Do not append work logs here.** Edit only your branch’s file below.
 
-| Branch | Who (edit if needed) | Progress file (tag this in Copilot) | Code you own |
-|--------|----------------------|-------------------------------------|--------------|
-| `branch-backend-core` | Vidhu | [`docs/progress/backend-core.md`](progress/backend-core.md) | `frontend/js/supabase.js`, shared `/docs/` guides (not other people’s progress files), backend logic |
-| `branch-hardware` | Kathleen | [`docs/progress/hardware.md`](progress/hardware.md) | `/hardware/` |
-| `branch-member-ui` | Turner | [`docs/progress/member-ui.md`](progress/member-ui.md) | `frontend/index.html`, `frontend/dashboard.html` |
-| `branch-db-onboarding` | Jayati/Kailash | [`docs/progress/db-onboarding.md`](progress/db-onboarding.md) | `/database/schema.sql`, `frontend/register.html` |
-| `branch-admin-analytics` | Jayati/Kailash | [`docs/progress/admin-analytics.md`](progress/admin-analytics.md) | `frontend/admin.html` |
+| Branch                   | Who (edit if needed) | Progress file (tag this in Copilot)                               | Code you own                                                                                         |
+| ------------------------ | -------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `main` (integration)     | Vidhu                | [`docs/progress/main.md`](progress/main.md)                       | Post-merge glue only (cloud keys/setup notes, seed/RLS, shared helpers) — not teammate page ownership |
+| `branch-backend-core`    | Vidhu                | [`docs/progress/backend-core.md`](progress/backend-core.md)       | `frontend/js/supabase.js`, shared `/docs/` guides (not other people’s progress files), backend logic |
+| `branch-hardware`        | Kathleen             | [`docs/progress/hardware.md`](progress/hardware.md)               | `/hardware/`                                                                                         |
+| `branch-member-ui`       | Turner               | [`docs/progress/member-ui.md`](progress/member-ui.md)             | `frontend/index.html`, `frontend/dashboard.html`                                                     |
+| `branch-db-onboarding`   | Jayati               | [`docs/progress/db-onboarding.md`](progress/db-onboarding.md)     | `/database/schema.sql`, `frontend/register.html`                                                     |
+| `branch-admin-analytics` | Kailash              | [`docs/progress/admin-analytics.md`](progress/admin-analytics.md) | `frontend/admin.html`                                                                                |
 
 ### Copilot tagging (per person)
 

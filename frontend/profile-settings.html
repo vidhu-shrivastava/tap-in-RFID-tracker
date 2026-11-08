@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Update your Tap-In member profile settings."
+    />
+    <title>Profile Settings | Tap-In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+
+      try {
+        if (localStorage.getItem("tapInTheme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (error) {
+        console.error("Could not load the display theme preference.", error);
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <!-- Keep the settings page navigation simple and easy to leave. -->
+    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <nav
+        aria-label="Main navigation"
+        class="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6"
+      >
+        <a
+          href="dashboard.html"
+          class="text-lg font-bold tracking-tight text-teal-800 dark:text-teal-300"
+        >
+          Tap-In
+        </a>
+        <a
+          href="dashboard.html"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        >
+          Back to dashboard
+        </a>
+      </nav>
+    </header>
+
+    <!-- The form only saves profile changes when Save and Exit is pressed. -->
+    <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <section
+        aria-labelledby="settings-heading"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+      >
+        <div class="mb-8">
+          <p class="text-sm font-semibold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+            Account
+          </p>
+          <h1
+            id="settings-heading"
+            class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            Profile settings
+          </h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Update your profile picture and the names shown on your dashboard.
+          </p>
+        </div>
+
+        <form id="profile-form" class="space-y-6">
+          <div class="flex items-center gap-4">
+            <div
+              class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
+            >
+              <span id="avatar-initials">AM</span>
+              <img
+                id="avatar-preview"
+                class="hidden h-full w-full object-cover"
+                alt="Profile picture preview"
+              />
+            </div>
+            <div>
+              <label
+                for="profile-picture"
+                class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Profile picture
+              </label>
+              <input
+                id="profile-picture"
+                name="profile-picture"
+                type="file"
+                accept="image/*"
+                class="block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:font-medium hover:file:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:text-slate-300 dark:file:bg-slate-800 dark:file:text-slate-100 dark:hover:file:bg-slate-700"
+              />
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Image files up to 2 MB are supported.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label
+                for="profile-name"
+                class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Profile name
+              </label>
+              <input
+                id="profile-name"
+                name="profile-name"
+                type="text"
+                autocomplete="name"
+                required
+                class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              />
+            </div>
+            <div>
+              <label
+                for="preferred-name"
+                class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              >
+                Preferred name
+              </label>
+              <input
+                id="preferred-name"
+                name="preferred-name"
+                type="text"
+                autocomplete="nickname"
+                class="block w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              />
+            </div>
+          </div>
+
+          <p
+            id="profile-status"
+            class="text-sm text-rose-700 dark:text-rose-300"
+            role="status"
+            aria-live="polite"
+          ></p>
+
+          <!-- Both exit choices stay together at the bottom of the form. -->
+          <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end dark:border-slate-800">
+            <button
+              id="exit-without-saving"
+              type="button"
+              class="rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Exit without Saving
+            </button>
+            <button
+              type="submit"
+              class="rounded-lg bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+            >
+              Save and Exit
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <!-- Vanilla JavaScript previews images and saves edits only on confirmation. -->
+    <script>
+      const profileForm = document.getElementById("profile-form");
+      const profilePictureInput = document.getElementById("profile-picture");
+      const profileNameInput = document.getElementById("profile-name");
+      const preferredNameInput = document.getElementById("preferred-name");
+      const avatarInitials = document.getElementById("avatar-initials");
+      const avatarPreview = document.getElementById("avatar-preview");
+      const profileStatus = document.getElementById("profile-status");
+      let selectedPicture = "";
+      let imageIsReading = false;
+
+      function setAvatar(picture, name) {
+        const initials = name
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((part) => part.charAt(0).toUpperCase())
+          .join("");
+        avatarInitials.textContent = initials || "AM";
+
+        if (picture && picture.startsWith("data:image/")) {
+          avatarPreview.src = picture;
+          avatarPreview.classList.remove("hidden");
+          avatarInitials.classList.add("hidden");
+        } else {
+          avatarPreview.removeAttribute("src");
+          avatarPreview.classList.add("hidden");
+          avatarInitials.classList.remove("hidden");
+        }
+      }
+
+      try {
+        const savedProfile = localStorage.getItem("tapInMemberProfile");
+        if (savedProfile) {
+          const profile = JSON.parse(savedProfile);
+          if (!profile || typeof profile !== "object") {
+            throw new Error("Saved profile data is not an object.");
+          }
+          profileNameInput.value = profile.name || "Alex Member";
+          preferredNameInput.value = profile.preferredName || "";
+          selectedPicture =
+            typeof profile.picture === "string" &&
+            profile.picture.startsWith("data:image/")
+              ? profile.picture
+              : "";
+          setAvatar(selectedPicture, profileNameInput.value);
+        } else {
+          profileNameInput.value = "Alex Member";
+          preferredNameInput.value = "Alex";
+          setAvatar("", profileNameInput.value);
+        }
+      } catch (error) {
+        console.error("Could not load saved profile settings.", error);
+        profileStatus.textContent =
+          "Saved profile settings could not be loaded. You can still enter new values.";
+        profileNameInput.value = "Alex Member";
+        preferredNameInput.value = "Alex";
+        setAvatar("", profileNameInput.value);
+      }
+
+      profileNameInput.addEventListener("input", () => {
+        setAvatar(selectedPicture, profileNameInput.value.trim());
+      });
+
+      profilePictureInput.addEventListener("change", () => {
+        const picture = profilePictureInput.files[0];
+        profileStatus.textContent = "";
+
+        if (!picture) {
+          return;
+        }
+
+        if (!picture.type.startsWith("image/")) {
+          profilePictureInput.value = "";
+          profileStatus.textContent = "Choose a valid image file.";
+          return;
+        }
+
+        if (picture.size > 2 * 1024 * 1024) {
+          profilePictureInput.value = "";
+          profileStatus.textContent = "Choose an image smaller than 2 MB.";
+          return;
+        }
+
+        imageIsReading = true;
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          imageIsReading = false;
+          if (typeof reader.result === "string") {
+            selectedPicture = reader.result;
+            setAvatar(selectedPicture, profileNameInput.value.trim());
+          } else {
+            profileStatus.textContent = "The image could not be previewed.";
+          }
+        });
+        reader.addEventListener("error", () => {
+          imageIsReading = false;
+          profileStatus.textContent = "The image could not be read. Try another file.";
+        });
+        reader.readAsDataURL(picture);
+      });
+
+      profileForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (imageIsReading) {
+          profileStatus.textContent = "Wait for the profile picture to finish loading.";
+          return;
+        }
+
+        const profile = {
+          name: profileNameInput.value.trim(),
+          preferredName: preferredNameInput.value.trim(),
+          picture: selectedPicture,
+        };
+
+        if (!profile.name) {
+          profileNameInput.focus();
+          profileStatus.textContent = "Enter a profile name before saving.";
+          return;
+        }
+
+        try {
+          localStorage.setItem("tapInMemberProfile", JSON.stringify(profile));
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          console.error("Could not save profile settings.", error);
+          profileStatus.textContent =
+            "Your profile could not be saved in this browser. Try a smaller picture or another browser.";
+        }
+      });
+
+      document
+        .getElementById("exit-without-saving")
+        .addEventListener("click", () => {
+          window.location.href = "dashboard.html";
+        });
+    </script>
+  </body>
+</html>

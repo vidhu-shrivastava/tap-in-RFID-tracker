@@ -33,6 +33,10 @@
 <!-- AI: append new bullets below. Do not delete older entries. -->
 
 - *(No AI entries yet — first work session will add the first timestamped bullet here.)*
+- **2026-10-19 20:21** — Files: `hardware/tap_in_scanner/tap_in_scanner.ino`.
+  Built: RC522 card detection and UID hex output over Serial. How it works: initializes SPI and MFRC522 in `setup()`, polls and prints UID bytes in `loop()`, then halts the PICC and stops crypto.
+- **2026-10-19 21:30** — Files: `hardware/tap_in_scanner/tap_in_scanner.ino`, `WEEK_1_PLAN.md`, `docs/progress/hardware.md`.
+  Built: clarified variable UID lengths and improved the Week 1 setup, implementation, and physical verification checklists. How it works: the sketch prints the reader-reported UID bytes, while the plan separates implemented code checks from library, compile, wiring, upload, and repeat-tap tests that require completion.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 
@@ -41,3 +45,6 @@
 **Instructions:** Periodically read the AI Work Log above, then write a plain-English summary of what you built and how it works — in your own words. Do not copy AI bullets word-for-word.
 
 *(Write your human summary below this line.)*
+
+- **2026-10-19 20:21** - The Arduino can look for a card, read the ID number (UID), and print the ID number on the computer. Then the arduino tell the card reader it's done and ready to scan another card.
+- **2026-10-19 21:30** - 
