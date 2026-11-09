@@ -71,20 +71,18 @@ Feature work landed on feature branches, then merged into **`main`**.
 
 ---
 
-## Secrets (never commit these)
+## Secrets (what may / may not be committed)
 
-This is a **public** GitHub repo. Real keys stay in **gitignored** local files only:
+| File | Tracked? | Contains |
+|------|----------|----------|
+| `frontend/js/supabase.local.js` | Yes (for hosting) | Cloud Project URL + **anon** / public key |
+| `frontend/js/admin.local.js` | **No** (gitignored) | Chapter admin gate password |
+| `backend/.env` | **No** (gitignored) | Same URL + anon for hardware receive on the server |
 
-| Local file (gitignored) | Copied from | Contains |
-|-------------------------|-------------|----------|
-| `frontend/js/supabase.local.js` | `supabase.local.js.example` | Cloud Project URL + **anon** key |
-| `frontend/js/admin.local.js` | `admin.local.js.example` | Chapter admin gate password |
-| `backend/.env` | `backend/.env.example` | Same URL + anon for hardware receive |
+The Supabase **anon** key is designed for browser use (same as shipping it in any frontend). Protection is Row Level Security + Auth — not hiding the anon key.
 
-**Never** commit `service_role` keys, real anon keys, WiFi passwords, or Auth passwords.  
-Tracked examples use placeholders only (`YOUR_SUPABASE_ANON_KEY`, `change-me-before-demo`).
-
-If `git status` ever lists `supabase.local.js`, `admin.local.js`, or `backend/.env` as staged — unstage immediately.
+**Never** commit `service_role` / secret keys, WiFi passwords, Auth passwords, or `admin.local.js`.  
+If `git status` lists `admin.local.js` or `backend/.env` as staged — unstage immediately.
 
 ---
 

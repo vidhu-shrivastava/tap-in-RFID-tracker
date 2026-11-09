@@ -1,10 +1,10 @@
 /**
- * Copy this file to:  frontend/js/supabase.local.js
- * supabase.local.js is gitignored — do NOT commit real keys.
+ * Template for frontend/js/supabase.local.js
  *
  * Cloud Supabase only → Project Settings → API
  *   Project URL + anon / public key (never service_role)
  *
+ * The anon key is browser-safe and may be committed for hosting.
  * Do not point this at http://127.0.0.1:54321 / Docker.
  * Setup: docs/LOCAL_SUPABASE.md
  */

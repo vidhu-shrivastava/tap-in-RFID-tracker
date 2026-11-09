@@ -8,12 +8,12 @@
  *     import { supabase, signInWithPassword, getSessionMember } from "./js/supabase.js";
  *   </script>
  *
- * SECRETS (do not put real keys in THIS file)
- * -------------------------------------------
- * 1. Copy supabase.local.js.example → supabase.local.js (gitignored)
- * 2. Put cloud Project URL + anon public key in supabase.local.js
- *    (Supabase → Project Settings → API). Do not use Docker / 127.0.0.1:54321.
+ * KEYS (do not put service_role / secrets in THIS file)
+ * -----------------------------------------------------
+ * Cloud Project URL + anon public key live in ./supabase.local.js
+ * (anon is browser-safe and may be committed for hosting).
  * Never use the service_role key in frontend code.
+ * Do not point supabase.local.js at Docker / 127.0.0.1:54321.
  *
  * Expected tables: members, events, attendance_logs
  * Scan RPC: handle_rfid_scan (see database/rpc_handle_scan.sql)

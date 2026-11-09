@@ -11,10 +11,10 @@
 !.env.example
 !.env.*.example
 
-# Local Supabase key overrides (copy from the .example file)
-frontend/js/supabase.local.js
+# Cloud Project URL + anon/public key may be committed in
+# frontend/js/supabase.local.js (browser-safe; never service_role).
 
-# Local admin gate password (copy from admin.local.js.example)
+# Local admin gate password (copy from admin.local.js.example) — keep private
 frontend/js/admin.local.js
 
 # Backend receive env (copy from backend/.env.example)
