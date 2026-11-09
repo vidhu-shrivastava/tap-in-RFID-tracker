@@ -103,6 +103,9 @@ supabase/.branches/
 WEEK_1_PLAN.md
 PHASE_2_PLAN.md
 
+# Phase 2 plans MAY be committed on feature branches so teammates can pull them.
+# Never put real Supabase keys or admin passwords inside PHASE_2_PLAN.md.
+
 # -----------------------------------------------------------------------------
 # Local scratch / merge artifacts (never commit)
 # -----------------------------------------------------------------------------

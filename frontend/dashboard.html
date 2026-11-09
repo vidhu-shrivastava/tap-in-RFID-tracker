@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="View your Tap-In attendance points and history."
+      content="View your Tap-In attendance points and recent scans."
     />
     <title>Tap-In — Member Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,6 @@
       tailwind.config = { darkMode: "class" };
     </script>
     <style>
-      /* Fade page colors when the light/dark theme changes. */
       html.theme-transition body,
       html.theme-transition body * {
         transition-property: color, background-color, border-color;
@@ -23,15 +22,17 @@
     </style>
   </head>
   <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-    <!-- The top navigation includes a menu for account and display options. -->
-    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <nav
-        aria-label="Main navigation"
-        class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6"
-      >
-        <a href="index.html" class="text-lg font-bold tracking-tight text-teal-800 dark:text-teal-300">
-          Tap-In
+    <header class="border-b border-emerald-200 bg-white/90 dark:border-emerald-800 dark:bg-slate-900">
+      <nav aria-label="Main navigation" class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+        <a href="index.html" class="flex items-center gap-2 text-lg font-bold tracking-tight text-emerald-900 dark:text-teal-300">
+          <svg aria-hidden="true" class="h-8 w-8 text-emerald-700 dark:text-emerald-400" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="40" height="40" rx="12" stroke="currentColor" stroke-width="2.5" />
+            <path d="M13 16h18M22 16v19" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <path d="M31 21c2.5 2 2.5 6 0 8M35 17c5 4 5 12 0 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+          </svg>
+          <span>Tap-IN</span>
         </a>
+
         <div class="relative">
           <button
             id="account-menu-button"
@@ -39,13 +40,9 @@
             aria-haspopup="true"
             aria-expanded="false"
             aria-controls="account-menu"
-            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <span
-              id="menu-avatar"
-              aria-hidden="true"
-              class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-xs font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
-            >
+            <span id="menu-avatar" aria-hidden="true" class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-xs font-bold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
               <span class="avatar-initials">…</span>
               <img class="avatar-image hidden h-full w-full object-cover" alt="" />
             </span>
@@ -54,33 +51,18 @@
               <path fill-rule="evenodd" d="M5.22 7.47a.75.75 0 0 1 1.06 0L10 11.19l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
             </svg>
           </button>
-          <div
-            id="account-menu"
-            role="menu"
-            aria-labelledby="account-menu-button"
-            class="absolute right-0 z-10 mt-2 hidden w-52 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
-          >
-            <button
-              id="theme-toggle"
-              type="button"
-              role="menuitem"
-              class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
+
+          <div id="account-menu" role="menu" aria-labelledby="account-menu-button" class="absolute right-0 z-10 mt-2 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+            <button id="theme-toggle" type="button" role="menuitem" class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800">
               Switch to dark mode
             </button>
-            <a
-              href="profile-settings.html"
-              role="menuitem"
-              class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
+            <a href="profile-settings.html" role="menuitem" class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800">
               Profile settings
             </a>
-            <button
-              id="sign-out-button"
-              type="button"
-              role="menuitem"
-              class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
+            <a id="admin-menu-item" href="admin.html" role="menuitem" class="hidden rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800">
+              Admin
+            </a>
+            <button id="sign-out-button" type="button" role="menuitem" class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800">
               Sign out
             </button>
           </div>
@@ -88,16 +70,12 @@
       </nav>
     </header>
 
-    <!-- Main holds the member summary and attendance history. -->
     <main class="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">
       <section aria-labelledby="welcome-heading">
-        <p class="text-sm font-semibold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+        <p class="text-sm font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
           Member profile
         </p>
-        <h1
-          id="welcome-heading"
-          class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
-        >
+        <h1 id="welcome-heading" class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
           Welcome back
         </h1>
         <p class="mt-2 text-slate-600 dark:text-slate-300">
@@ -105,18 +83,10 @@
         </p>
       </section>
 
-      <!-- Profile and points are grouped in a single responsive summary card. -->
-      <section
-        aria-labelledby="points-heading"
-        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
-      >
+      <section aria-labelledby="points-heading" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div class="flex min-w-0 flex-1 items-center gap-4">
-            <div
-              id="profile-avatar"
-              aria-hidden="true"
-              class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-100 text-lg font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-200"
-            >
+            <div id="profile-avatar" aria-hidden="true" class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-lg font-bold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
               <span class="avatar-initials">…</span>
               <img class="avatar-image hidden h-full w-full object-cover" alt="" />
             </div>
@@ -124,72 +94,62 @@
               <h2 id="display-profile-name" class="truncate text-lg font-semibold">
                 Loading…
               </h2>
-              <p
-                id="display-preferred-name"
-                class="mt-1 text-sm text-slate-500 dark:text-slate-400"
-              >
+              <p id="display-preferred-name" class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Tap-In member
               </p>
-              <p
-                id="display-member-email"
-                class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400"
-              ></p>
+              <p id="display-member-email" class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400"></p>
             </div>
           </div>
+
           <div class="sm:w-64">
             <div class="flex items-baseline justify-between gap-3">
               <h2 id="points-heading" class="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Attendance points
               </h2>
-              <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">
+              <p class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
                 <span id="points-value" class="text-2xl">0</span>
                 <span class="text-slate-500 dark:text-slate-400">/ 100</span>
               </p>
             </div>
-            <div
-              id="points-bar-wrap"
-              class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"
-              role="progressbar"
-              aria-label="Attendance points progress"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-            >
-              <div
-                id="points-bar"
-                class="h-full rounded-full bg-teal-700"
-                style="width: 0%"
-              ></div>
+            <div id="points-bar-wrap" class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700" role="progressbar" aria-label="Attendance points progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="points-bar" class="h-full rounded-full bg-emerald-700" style="width: 0%"></div>
             </div>
-            <p
-              id="points-goal-text"
-              class="mt-2 text-xs text-slate-500 dark:text-slate-400"
-            >
+            <p id="points-goal-text" class="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Loading points…
             </p>
           </div>
         </div>
-        <p
-          id="profile-load-status"
-          class="mt-4 text-sm text-slate-600 dark:text-slate-300"
-          role="status"
-          aria-live="polite"
-        >
+
+        <p id="profile-load-status" class="mt-4 text-sm text-slate-600 dark:text-slate-300" role="status" aria-live="polite">
           Loading your membership…
         </p>
+
+        <div id="rfid-status-card" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100">
+          Checking RFID setup…
+        </div>
       </section>
 
-      <!-- The scrollable table keeps all history columns usable on small screens. -->
-      <section
-        aria-labelledby="history-heading"
-        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-      >
+      <section id="rfid-register-row" aria-label="RFID registration" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold">RFID card</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Register your card once so tap-ins can log your attendance.
+            </p>
+          </div>
+          <a id="rfid-register-link" href="register.html" class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+            Register RFID card
+          </a>
+        </div>
+      </section>
+
+      <section aria-labelledby="history-heading" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="px-6 py-5 sm:px-8">
           <h2 id="history-heading" class="text-lg font-semibold">
             Previous attendance
           </h2>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Live scan timestamps from Supabase attendance logs.
+            Recent scan timestamps from Supabase attendance logs.
           </p>
         </div>
         <div class="overflow-x-auto">
@@ -198,20 +158,12 @@
               <tr>
                 <th scope="col" class="px-6 py-3 font-semibold sm:px-8">Scanned at</th>
                 <th scope="col" class="px-6 py-3 font-semibold">Event</th>
-                <th scope="col" class="px-6 py-3 text-right font-semibold sm:px-8">
-                  Points
-                </th>
+                <th scope="col" class="px-6 py-3 text-right font-semibold sm:px-8">Points</th>
               </tr>
             </thead>
-            <tbody
-              id="attendance-body"
-              class="divide-y divide-slate-100 dark:divide-slate-800"
-            >
+            <tbody id="attendance-body" class="divide-y divide-slate-100 dark:divide-slate-800">
               <tr>
-                <td
-                  colspan="3"
-                  class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8"
-                >
+                <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8">
                   Loading attendance…
                 </td>
               </tr>
@@ -221,13 +173,13 @@
       </section>
     </main>
 
-    <!-- Vanilla JS: theme/menu (Turner) + live Supabase data. -->
     <script type="module">
       import {
         getMemberSession,
         clearMemberSession,
         getMemberById,
         getMemberAttendance,
+        isAdminRfid,
       } from "./js/supabase.js";
 
       const menuButton = document.getElementById("account-menu-button");
@@ -235,6 +187,10 @@
       const themeToggle = document.getElementById("theme-toggle");
       const signOutButton = document.getElementById("sign-out-button");
       const statusEl = document.getElementById("profile-load-status");
+      const adminMenuItem = document.getElementById("admin-menu-item");
+      const rfidStatusCard = document.getElementById("rfid-status-card");
+      const rfidRegisterLink = document.getElementById("rfid-register-link");
+      const POINTS_GOAL = 100;
       let themeTransitionTimer;
 
       const session = getMemberSession();
@@ -242,19 +198,11 @@
         window.location.href = "index.html";
       }
 
-      /**
-       * Apply cosmetic preferred name / picture from Turner's profile-settings
-       * localStorage, layered on top of the live Supabase full_name.
-       */
       function showProfile(profileName, preferredFromStorage) {
         const preferredName =
-          typeof preferredFromStorage === "string"
-            ? preferredFromStorage.trim()
-            : "";
+          typeof preferredFromStorage === "string" ? preferredFromStorage.trim() : "";
         const displayName =
-          typeof profileName === "string" && profileName.trim()
-            ? profileName.trim()
-            : "Member";
+          typeof profileName === "string" && profileName.trim() ? profileName.trim() : "Member";
         const initials = displayName
           .split(/\s+/)
           .slice(0, 2)
@@ -288,10 +236,9 @@
       }
 
       function renderPoints(totalPoints) {
-        const goal = 100;
         const points = Number(totalPoints) || 0;
-        const capped = Math.min(points, goal);
-        const pct = Math.round((capped / goal) * 100);
+        const capped = Math.min(points, POINTS_GOAL);
+        const pct = Math.round((capped / POINTS_GOAL) * 100);
 
         document.getElementById("points-value").textContent = String(points);
         document.getElementById("points-bar").style.width = `${pct}%`;
@@ -299,18 +246,19 @@
           .getElementById("points-bar-wrap")
           .setAttribute("aria-valuenow", String(capped));
         document.getElementById("points-goal-text").textContent =
-          points >= goal
+          points >= POINTS_GOAL
             ? "Goal reached — nice work!"
-            : `${goal - points} points to your ${goal}-point goal`;
+            : `${POINTS_GOAL - points} points to your ${POINTS_GOAL}-point goal`;
       }
 
       function renderAttendance(rows) {
         const body = document.getElementById("attendance-body");
+
         if (!rows.length) {
           body.innerHTML = `
             <tr>
               <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400 sm:px-8">
-                No attendance yet. Tap in at an active event to see history here.
+                No attendance yet. Tap in at an active event to see your history here.
               </td>
             </tr>`;
           return;
@@ -318,28 +266,56 @@
 
         body.innerHTML = rows
           .map((row) => {
-            const when = row.scanned_at
-              ? new Date(row.scanned_at).toLocaleString()
-              : "—";
+            const when = row.scanned_at ? new Date(row.scanned_at).toLocaleString() : "—";
             const eventName = row.events?.event_name || "Unknown event";
             const pts = row.events?.point_value ?? "—";
             return `
               <tr>
                 <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-300 sm:px-8">${when}</td>
                 <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">${eventName}</td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-teal-800 dark:text-teal-300 sm:px-8">+${pts}</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-800 dark:text-emerald-300 sm:px-8">+${pts}</td>
               </tr>`;
           })
           .join("");
       }
 
+      function renderRfidState(member) {
+        const hasCard = typeof member.rfid_uid === "string" && member.rfid_uid.trim();
+        const registerButton = document.getElementById("rfid-register-link");
+
+        if (hasCard) {
+          rfidStatusCard.textContent = "RFID card registered — you are ready to check in.";
+          rfidStatusCard.className = "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/35 dark:text-emerald-200";
+          registerButton.classList.add("hidden");
+        } else {
+          rfidStatusCard.textContent = "RFID card not bound yet. Register one from here to finish setup.";
+          rfidStatusCard.className = "mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100";
+          registerButton.classList.remove("hidden");
+        }
+      }
+
       async function loadDashboard() {
-        const { data: member, error: memberError } = await getMemberById(session.id);
-        if (memberError || !member) {
-          statusEl.textContent =
-            "Could not load your member row. Sign in again or check Supabase.";
-          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
-          return;
+        let member = null;
+
+        if (String(session.id || "").startsWith("preview-")) {
+          const preview = JSON.parse(localStorage.getItem("tapInPreviewMember") || "{}") || {};
+          member = {
+            id: session.id,
+            full_name: session.full_name || preview.full_name || "Member",
+            email: session.email || preview.email || "guest@example.com",
+            rfid_uid: "",
+            total_points: 0,
+          };
+          statusEl.textContent = "Preview account loaded — bind your RFID card when you are ready.";
+          statusEl.className = "mt-4 text-sm text-amber-700 dark:text-amber-300";
+        } else {
+          const { data: memberRow, error: memberError } = await getMemberById(session.id);
+          if (memberError || !memberRow) {
+            statusEl.textContent = "Could not load your member row. Sign in again or check Supabase.";
+            statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+          member = memberRow;
         }
 
         let preferredName = "";
@@ -349,12 +325,8 @@
           if (savedProfile) {
             const profile = JSON.parse(savedProfile);
             if (profile && typeof profile === "object") {
-              preferredName =
-                typeof profile.preferredName === "string"
-                  ? profile.preferredName
-                  : "";
-              picture =
-                typeof profile.picture === "string" ? profile.picture : "";
+              preferredName = typeof profile.preferredName === "string" ? profile.preferredName : "";
+              picture = typeof profile.picture === "string" ? profile.picture : "";
             }
           }
         } catch (error) {
@@ -365,18 +337,31 @@
         applyCosmeticPicture(picture);
         document.getElementById("display-member-email").textContent = member.email;
         renderPoints(member.total_points);
+        renderRfidState(member);
 
-        const { data: logs, error: logsError } = await getMemberAttendance(member.id);
-        if (logsError) {
-          statusEl.textContent =
-            "Member loaded, but attendance history failed to load.";
-          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+        if (String(session.id || "").startsWith("preview-")) {
           renderAttendance([]);
-          return;
+        } else {
+          const { data: logs, error: logsError } = await getMemberAttendance(member.id);
+          if (logsError) {
+            statusEl.textContent = "Member loaded, but attendance history failed to load.";
+            statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+            renderAttendance([]);
+            return;
+          }
+          renderAttendance(logs);
         }
 
-        renderAttendance(logs);
-        statusEl.textContent = `Signed in as ${member.email}`;
+        if (isAdminRfid(member.rfid_uid || "")) {
+          adminMenuItem.classList.remove("hidden");
+        } else {
+          adminMenuItem.classList.add("hidden");
+        }
+
+        const isPreviewAccount = String(session.id || "").startsWith("preview-");
+        statusEl.textContent = isPreviewAccount
+          ? "Preview account active — finish by binding your RFID card."
+          : "Your dashboard is ready.";
         statusEl.className = "mt-4 text-sm text-slate-600 dark:text-slate-300";
       }
 
@@ -404,9 +389,7 @@
         const page = document.documentElement;
         page.classList.add("theme-transition");
         const isDarkMode = page.classList.toggle("dark");
-        themeToggle.textContent = isDarkMode
-          ? "Switch to light mode"
-          : "Switch to dark mode";
+        themeToggle.textContent = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
         try {
           localStorage.setItem("tapInTheme", isDarkMode ? "dark" : "light");
         } catch (error) {
