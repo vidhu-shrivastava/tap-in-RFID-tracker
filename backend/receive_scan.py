@@ -10,6 +10,9 @@ then calls the Supabase RPC handle_rfid_scan — the same function the admin UI 
 frontend helpers use. No Flask/Express; stdlib only so beginners can run it with
 `python3 receive_scan.py`.
 
+Phase 2 Auth (email/password in supabase.js) does NOT change this contract.
+Hardware still posts { "uid": "<HEX>" }; RLS stays open until taps are proven.
+
 SETUP
 -----
 1. cp .env.example .env

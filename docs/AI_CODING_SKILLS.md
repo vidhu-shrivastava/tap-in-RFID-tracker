@@ -77,7 +77,7 @@ Use these exact table/column names unless the Team Lead updates this doc.
 | `id` | `uuid` | Primary key |
 | `full_name` | `text` | Member display name |
 | `email` | `text` | Unique |
-| `rfid_uid` | `text` | Unique RFID card UID |
+| `rfid_uid` | `text` | Unique RFID card UID; **nullable** until bound (account-first Auth — see `database/phase2_nullable_rfid.sql`) |
 | `total_points` | `int4` | Default `0` |
 
 ### `events`
@@ -191,9 +191,11 @@ To prevent code degradation, memory rot, and hallucinated functions:
 
 **Auth model for MVP (keep simple unless Lead upgrades):**
 
-- Prefer Supabase Auth **or** a tightly scoped anon-key + Row Level Security design — **not** legacy server-rendered session cookie apps, and **not** a custom Flask JWT service.
+- Phase 2: Supabase Auth **email + password** helpers in `frontend/js/supabase.js` (`signUpWithPassword` / `signInWithPassword` / `getSessionMember`). **No Google / OAuth.**
+- Product rule: create account first, bind RFID later via `registerRfidForCurrentMember`. Admin = `rfid_uid` contains `ADMIN` (`isAdminMember`).
 - Never hardcode the Supabase **service role** key in frontend HTML/JS.
 - Fail closed: if a query/auth check fails, show a clear error message; do not pretend the write succeeded.
+- Keep RLS relatively open until hardware `backend/` `/scan` is proven; tighten after.
 
 **UI presentation for a student-org MVP (not a SaaS dark-glow aesthetic):**
 

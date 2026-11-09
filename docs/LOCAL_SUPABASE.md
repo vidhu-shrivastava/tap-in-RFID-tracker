@@ -33,8 +33,11 @@ Paste and run, in order:
 1. [`database/schema.sql`](../database/schema.sql) — tables
 2. [`database/rpc_handle_scan.sql`](../database/rpc_handle_scan.sql) — scan function
 3. [`database/lead_explore_seed.sql`](../database/lead_explore_seed.sql) — MVP anon RLS grants + team directory + sample event
+4. [`database/phase2_nullable_rfid.sql`](../database/phase2_nullable_rfid.sql) — allow account signup before RFID bind
 
 If you already applied an older `schema.sql` without `is_archived`, the seed file adds that column safely.
+
+**Auth (Phase 2):** For local demos, in Supabase → Authentication → Providers → Email, disable **Confirm email** so `signUpWithPassword` returns a session immediately. Keep RLS open (seed policies) until Kathleen’s hardware tap path works.
 
 ## 4. Serve the frontend
 
@@ -47,10 +50,10 @@ Open **http://localhost:5500/index.html**
 
 | Page | Purpose |
 |------|---------|
-| `index.html` | Sign in with a registered email |
-| `register.html` | Create a member + RFID UID |
+| `index.html` | Member sign-in (Turner wires password Auth helpers) |
+| `register.html` | Create Auth account first; optional RFID bind |
 | `dashboard.html` | Live points + attendance |
-| `admin.html` | Events, activate / deactivate / archive, simulate scan, Chart.js |
+| `admin.html` | Chapter admin — events, vertical chart, simulate scan |
 
 Hardware tap path (Arduino → scan RPC / `backend/` receive): see [`docs/HARDWARE_TAP_PATH.md`](HARDWARE_TAP_PATH.md).
 

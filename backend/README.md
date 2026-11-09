@@ -43,7 +43,7 @@ You need an **active event** and a registered member with that RFID UID (use Adm
 | Method | Path | Body | Notes |
 |--------|------|------|-------|
 | `GET` | `/health` | — | Liveness check |
-| `POST` | `/scan` | `{ "uid": "A1B2C3D4" }` | Calls `handle_rfid_scan` |
+| `POST` | `/scan` | `{ "uid": "A1B2C3D4" }` | Calls `handle_rfid_scan` (contract stable through Phase 2 Auth) |
 
 ## Files
 

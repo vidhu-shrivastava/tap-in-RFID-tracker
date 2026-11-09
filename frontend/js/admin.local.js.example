@@ -2,8 +2,9 @@
  * Copy this file to:  frontend/js/admin.local.js
  * admin.local.js is gitignored — do NOT commit the real password.
  *
- * Share the password offline with execs who need the admin dashboard.
- * This is a light MVP gate only (not real Auth).
+ * Quiet chapter-admin gate on admin.html (after a signed-in admin opens Admin
+ * from their profile). Real account security is Supabase Auth passwords —
+ * this file is only an extra MVP lock for the admin shell.
  */
 
 export const ADMIN_PASSWORD = "change-me-before-demo";

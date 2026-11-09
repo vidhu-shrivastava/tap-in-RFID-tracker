@@ -3,73 +3,168 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tap-In — Exec Admin</title>
+    <title>Tap-IN — Chapter admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+      try {
+        if (localStorage.getItem("tapInTheme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (error) {
+        console.error("Could not load theme preference.", error);
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Gate: password from gitignored admin.local.js -->
+  <body
+    class="min-h-screen bg-gradient-to-br from-green-100 via-emerald-50 to-teal-100 text-slate-900 dark:bg-slate-950 dark:bg-none dark:text-slate-100"
+  >
+    <!-- Quiet gate: signed-in admin + optional local password -->
     <div
       id="login-gate"
       class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16"
     >
-      <h1 class="text-3xl font-bold tracking-tight">Exec Admin</h1>
-      <p class="mt-2 text-slate-600">
-        Enter the private admin password from
-        <code class="rounded bg-slate-100 px-1">admin.local.js</code>
-        (gitignored — share that file offline with the team).
+      <div class="mb-6 flex items-center gap-3">
+        <svg
+          aria-hidden="true"
+          class="h-10 w-10 text-emerald-700 dark:text-emerald-400"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="4"
+            y="4"
+            width="40"
+            height="40"
+            rx="12"
+            stroke="currentColor"
+            stroke-width="2.5"
+          />
+          <path
+            d="M13 16h18M22 16v19"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+          <path
+            d="M31 21c2.5 2 2.5 6 0 8M35 17c5 4 5 12 0 16"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <div>
+          <p
+            class="text-sm font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300"
+          >
+            Tap-IN
+          </p>
+          <h1 class="text-2xl font-bold tracking-tight">Chapter admin</h1>
+        </div>
+      </div>
+
+      <p
+        id="gate-hint"
+        class="text-sm text-slate-600 dark:text-slate-400"
+      >
+        Opened from a signed-in admin profile. Enter the chapter password to
+        continue.
       </p>
+
       <form id="admin-login-form" class="mt-8 space-y-4">
         <div>
-          <label for="admin-password" class="block text-sm font-semibold"
-            >Admin password</label
+          <label
+            for="admin-password"
+            class="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+            >Chapter password</label
           >
           <input
             id="admin-password"
             type="password"
             autocomplete="current-password"
             required
-            class="mt-2 w-full rounded border border-slate-300 px-3 py-2.5 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/20"
+            class="mt-2 w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-emerald-400"
           />
         </div>
         <button
           type="submit"
-          class="w-full rounded bg-teal-800 px-4 py-3 font-semibold text-white hover:bg-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2"
+          class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-4 py-3 font-semibold text-white shadow-md shadow-emerald-900/20 hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
         >
           Unlock admin
         </button>
         <p
           id="login-status"
-          class="min-h-5 text-sm text-slate-600"
+          class="min-h-5 text-sm text-slate-600 dark:text-slate-400"
           role="status"
           aria-live="polite"
         ></p>
       </form>
       <p class="mt-6 text-sm">
-        <a class="text-teal-800 underline" href="index.html"
-          >← Back to member sign-in</a
+        <a
+          class="font-medium text-emerald-800 underline dark:text-emerald-300"
+          href="dashboard.html"
+          >← Back to dashboard</a
         >
       </p>
     </div>
 
     <!-- Dashboard (shown after unlock) -->
     <div id="admin-app" class="hidden">
-      <header class="border-b border-slate-200 bg-white">
+      <header
+        class="border-b border-emerald-200 bg-white/90 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
+      >
         <nav
           class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6"
         >
-          <p class="text-lg font-bold tracking-tight text-teal-800">
-            Tap-In Admin
-          </p>
-          <div class="flex items-center gap-3 text-sm">
-            <a class="text-slate-600 underline" href="index.html">Member home</a>
-            <a class="text-slate-600 underline" href="register.html"
-              >Register</a
+          <a
+            href="dashboard.html"
+            class="flex items-center gap-2 text-lg font-bold tracking-tight text-emerald-900 dark:text-teal-300"
+          >
+            <svg
+              aria-hidden="true"
+              class="h-8 w-8 text-emerald-700 dark:text-emerald-400"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
+              <rect
+                x="4"
+                y="4"
+                width="40"
+                height="40"
+                rx="12"
+                stroke="currentColor"
+                stroke-width="2.5"
+              />
+              <path
+                d="M13 16h18M22 16v19"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <path
+                d="M31 21c2.5 2 2.5 6 0 8M35 17c5 4 5 12 0 16"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>Chapter admin</span>
+          </a>
+          <div class="flex items-center gap-3 text-sm">
+            <button
+              id="theme-toggle"
+              type="button"
+              class="rounded-lg px-3 py-1.5 font-medium text-slate-600 hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-emerald-950/50"
+            >
+              Switch to dark mode
+            </button>
             <button
               id="admin-lock"
               type="button"
-              class="rounded border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-50"
+              class="rounded-lg border border-emerald-200 px-3 py-1.5 font-medium hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950/40"
             >
               Exit
             </button>
@@ -80,7 +175,7 @@
       <main class="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:px-6 sm:py-12">
         <p
           id="admin-status"
-          class="text-sm text-slate-600"
+          class="text-sm text-slate-600 dark:text-slate-400"
           role="status"
           aria-live="polite"
         ></p>
@@ -88,10 +183,10 @@
         <!-- Create + activate events -->
         <section
           aria-labelledby="events-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="events-heading" class="text-xl font-semibold">Events</h2>
-          <p class="mt-1 text-sm text-slate-600">
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Activate one event for scans. When finished, deactivate it or archive
             it so it leaves the live list.
           </p>
@@ -108,7 +203,7 @@
                 id="event_name"
                 required
                 maxlength="120"
-                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 dark:border-emerald-800 dark:bg-slate-800"
                 placeholder="Chapter Meeting"
               />
             </div>
@@ -120,7 +215,7 @@
                 id="event_date"
                 type="date"
                 required
-                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 dark:border-emerald-800 dark:bg-slate-800"
               />
             </div>
             <div>
@@ -133,13 +228,13 @@
                 min="1"
                 value="10"
                 required
-                class="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 dark:border-emerald-800 dark:bg-slate-800"
               />
             </div>
             <div class="sm:col-span-4">
               <button
                 type="submit"
-                class="rounded bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-900"
+                class="rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900"
               >
                 Create event
               </button>
@@ -149,7 +244,7 @@
           <div class="mt-6 overflow-x-auto">
             <table class="w-full min-w-[36rem] text-left text-sm">
               <thead
-                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+                class="bg-emerald-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-emerald-950/40 dark:text-slate-400"
               >
                 <tr>
                   <th class="px-3 py-2">Name</th>
@@ -159,23 +254,43 @@
                   <th class="w-44 px-2 py-2 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="events-body" class="divide-y divide-slate-100"></tbody>
+              <tbody id="events-body" class="divide-y divide-emerald-100 dark:divide-emerald-900"></tbody>
             </table>
           </div>
         </section>
 
-        <!-- Chart.js attendance by event -->
+        <!-- Vertical attendance chart: solid = check-ins, hollow = org RFID size -->
         <section
           aria-labelledby="chart-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="chart-heading" class="text-xl font-semibold">
             Check-ins per event
           </h2>
-          <p class="mt-1 text-sm text-slate-600">
-            Live events only — totals from attendance logs (Chart.js).
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Solid bars = attendance. Outline bars = total registered RFID cards
+            (org size). Dates on the X-axis.
           </p>
-          <div class="relative mt-6 h-64 w-full sm:h-72">
+
+          <div class="mt-4 max-w-sm">
+            <label for="event-detail" class="block text-sm font-semibold"
+              >Event detail</label
+            >
+            <select
+              id="event-detail"
+              class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 text-sm dark:border-emerald-800 dark:bg-slate-800"
+            >
+              <option value="">Select an event…</option>
+            </select>
+            <p
+              id="event-detail-status"
+              class="mt-2 text-sm text-slate-600 dark:text-slate-400"
+            >
+              Pick an event to see attended / total cards.
+            </p>
+          </div>
+
+          <div class="relative mt-6 h-72 w-full sm:h-80">
             <canvas
               id="attendance-chart"
               aria-label="Attendance bar chart"
@@ -192,14 +307,14 @@
         <!-- Manual scan smoke test -->
         <section
           aria-labelledby="scan-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="scan-heading" class="text-xl font-semibold">
             Test RFID scan
           </h2>
-          <p class="mt-1 text-sm text-slate-600">
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Calls
-            <code class="rounded bg-slate-100 px-1">handle_rfid_scan</code>
+            <code class="rounded bg-emerald-50 px-1 dark:bg-emerald-950/50">handle_rfid_scan</code>
             with a UID (same path hardware will use later).
           </p>
           <form
@@ -214,20 +329,20 @@
                 id="scan_uid"
                 required
                 pattern="[A-Za-z0-9]+"
-                class="mt-1 w-full rounded border border-slate-300 px-3 py-2 font-mono uppercase"
+                class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 font-mono uppercase dark:border-emerald-800 dark:bg-slate-800"
                 placeholder="ADMIN001 or A1B2C3D4"
               />
             </div>
             <button
               type="submit"
-              class="rounded bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+              class="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-emerald-800 dark:hover:bg-emerald-700"
             >
               Run scan RPC
             </button>
           </form>
           <pre
             id="scan-result"
-            class="mt-4 min-h-16 overflow-x-auto rounded bg-slate-900 p-4 text-xs text-slate-100"
+            class="mt-4 min-h-16 overflow-x-auto rounded-lg bg-slate-900 p-4 text-xs text-slate-100"
           >
 Results show here after a scan.</pre
           >
@@ -236,19 +351,18 @@ Results show here after a scan.</pre
         <!-- Members -->
         <section
           aria-labelledby="members-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="members-heading" class="text-xl font-semibold">Members</h2>
-          <p class="mt-1 text-sm text-slate-600">
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
             UIDs containing
-            <code class="rounded bg-slate-100 px-1">ADMIN</code>
-            show as admin priority. Regular cards register via
-            <a class="text-teal-800 underline" href="register.html">register</a>.
+            <code class="rounded bg-emerald-50 px-1 dark:bg-emerald-950/50">ADMIN</code>
+            count as chapter admin. Members without a card show as unbound.
           </p>
           <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[36rem] text-left text-sm">
               <thead
-                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+                class="bg-emerald-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-emerald-950/40 dark:text-slate-400"
               >
                 <tr>
                   <th class="px-3 py-2">Name</th>
@@ -260,7 +374,7 @@ Results show here after a scan.</pre
               </thead>
               <tbody
                 id="members-body"
-                class="divide-y divide-slate-100"
+                class="divide-y divide-emerald-100 dark:divide-emerald-900"
               ></tbody>
             </table>
           </div>
@@ -268,7 +382,7 @@ Results show here after a scan.</pre
 
         <section
           aria-labelledby="logs-heading"
-          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="logs-heading" class="text-xl font-semibold">
             Recent attendance
@@ -276,7 +390,7 @@ Results show here after a scan.</pre
           <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[36rem] text-left text-sm">
               <thead
-                class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+                class="bg-emerald-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-emerald-950/40 dark:text-slate-400"
               >
                 <tr>
                   <th class="px-3 py-2">When</th>
@@ -285,7 +399,7 @@ Results show here after a scan.</pre
                   <th class="px-3 py-2 text-right">Points</th>
                 </tr>
               </thead>
-              <tbody id="logs-body" class="divide-y divide-slate-100"></tbody>
+              <tbody id="logs-body" class="divide-y divide-emerald-100 dark:divide-emerald-900"></tbody>
             </table>
           </div>
         </section>
@@ -293,6 +407,10 @@ Results show here after a scan.</pre
     </div>
 
     <script type="module">
+      // Chapter admin shell:
+      //   1) must already be signed in as an ADMIN-UID member
+      //   2) then enter the quiet password from admin.local.js
+      //   3) Exit always sends you back to dashboard.html (not index)
       import { ADMIN_PASSWORD } from "./js/admin.local.js";
       import {
         listEvents,
@@ -302,50 +420,112 @@ Results show here after a scan.</pre
         archiveEvent,
         listMembers,
         isAdminRfid,
+        isAdminMember,
+        memberHasRfid,
         listEventCheckInCounts,
         listRecentAttendance,
         handleRfidScan,
+        getSessionMember,
       } from "./js/supabase.js";
 
       const ADMIN_SESSION_KEY = "tapInAdminUnlocked";
       const gate = document.getElementById("login-gate");
       const app = document.getElementById("admin-app");
       const loginStatus = document.getElementById("login-status");
+      const gateHint = document.getElementById("gate-hint");
       const adminStatus = document.getElementById("admin-status");
-      let attendanceChart = null;
+      const themeToggle = document.getElementById("theme-toggle");
+      const eventDetail = document.getElementById("event-detail");
+      const eventDetailStatus = document.getElementById("event-detail-status");
+      let attendanceChart = null; // Chart.js instance (reused on refresh)
+      let latestChartRows = []; // last chart payload (dropdown + tooltips)
+      let gateMember = null; // signed-in member checked before unlock
+
+      function setThemeLabel() {
+        if (!themeToggle) return;
+        const isDark = document.documentElement.classList.contains("dark");
+        themeToggle.textContent = isDark
+          ? "Switch to light mode"
+          : "Switch to dark mode";
+      }
+
+      setThemeLabel();
+      themeToggle?.addEventListener("click", () => {
+        const nextIsDark = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", nextIsDark);
+        try {
+          localStorage.setItem("tapInTheme", nextIsDark ? "dark" : "light");
+        } catch (error) {
+          console.error("Could not save theme preference.", error);
+        }
+        setThemeLabel();
+      });
 
       function isUnlocked() {
         return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
       }
 
       function unlock() {
+        // Remember unlock for this browser tab, then load events/members/chart.
         sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
         gate.classList.add("hidden");
         app.classList.remove("hidden");
         refreshAll();
       }
 
-      function lock() {
+      function lockAndExit() {
+        // Exit → member dashboard (Phase 2 product rule), not public sign-in.
         sessionStorage.removeItem(ADMIN_SESSION_KEY);
-        app.classList.add("hidden");
-        gate.classList.remove("hidden");
+        window.location.href = "dashboard.html";
+      }
+
+      // Soft-block non-admins up front (password alone is not enough).
+      const sessionResult = await getSessionMember();
+      gateMember = sessionResult.data;
+
+      if (!gateMember) {
+        gateHint.textContent =
+          "Sign in on the member app first, then open Admin from your profile menu.";
+      } else if (!isAdminMember(gateMember)) {
+        gateHint.textContent =
+          "This page is for chapter admins (RFID UID contains ADMIN). Head back to your dashboard.";
+      } else {
+        gateHint.textContent = `Signed in as ${gateMember.full_name || gateMember.email}. Enter the chapter password to continue.`;
       }
 
       document
         .getElementById("admin-login-form")
         .addEventListener("submit", (event) => {
           event.preventDefault();
+
+          // Gate checks in order: signed in? → admin UID? → chapter password?
+          if (!gateMember) {
+            loginStatus.textContent =
+              "Sign in first, then open Admin from your profile.";
+            loginStatus.className =
+              "min-h-5 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+          if (!isAdminMember(gateMember)) {
+            loginStatus.textContent =
+              "Your account is not marked as chapter admin.";
+            loginStatus.className =
+              "min-h-5 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+
           const entered = document.getElementById("admin-password").value;
           if (entered !== ADMIN_PASSWORD) {
             loginStatus.textContent = "Wrong password.";
-            loginStatus.className = "min-h-5 text-sm text-rose-700";
+            loginStatus.className =
+              "min-h-5 text-sm text-rose-700 dark:text-rose-300";
             return;
           }
           loginStatus.textContent = "";
           unlock();
         });
 
-      document.getElementById("admin-lock").addEventListener("click", lock);
+      document.getElementById("admin-lock").addEventListener("click", lockAndExit);
 
       function escapeHtml(value) {
         return String(value ?? "")
@@ -355,9 +535,27 @@ Results show here after a scan.</pre
           .replaceAll('"', "&quot;");
       }
 
+      function formatEventStamp(eventDate, eventName) {
+        if (!eventDate) return eventName || "Event";
+        // event_date is a calendar date — show a clear stamp on the X-axis.
+        const parsed = new Date(`${eventDate}T12:00:00`);
+        const stamp = Number.isNaN(parsed.getTime())
+          ? eventDate
+          : parsed.toLocaleString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
+        const shortName =
+          String(eventName || "").length > 18
+            ? `${String(eventName).slice(0, 16)}…`
+            : eventName || "Event";
+        return `${stamp}\n${shortName}`;
+      }
+
       function eventStatusHtml(ev) {
         if (ev.is_active) {
-          return '<span class="font-semibold text-teal-800">Active</span>';
+          return '<span class="font-semibold text-emerald-800 dark:text-emerald-300">Active</span>';
         }
         if (ev.is_archived) {
           return '<span class="font-medium text-slate-500">Archived</span>';
@@ -370,7 +568,7 @@ Results show here after a scan.</pre
           return `<span class="text-xs text-slate-400">Done</span>`;
         }
 
-        const archiveBtn = `<button type="button" data-archive="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-slate-300 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">Archive</button>`;
+        const archiveBtn = `<button type="button" data-archive="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-emerald-200 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-slate-200">Archive</button>`;
 
         if (ev.is_active) {
           return `<div class="flex max-w-[10.5rem] flex-wrap items-center justify-end gap-1.5">
@@ -381,15 +579,51 @@ Results show here after a scan.</pre
 
         return `<div class="flex max-w-[10.5rem] flex-wrap items-center justify-end gap-1.5">
           ${archiveBtn}
-          <button type="button" data-activate="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-teal-700 px-2 py-1 text-[11px] font-semibold text-teal-800 hover:bg-teal-50">Activate</button>
+          <button type="button" data-activate="${escapeHtml(ev.id)}" class="shrink-0 rounded border border-emerald-700 px-2 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50 dark:text-emerald-300">Activate</button>
         </div>`;
       }
 
+      function updateEventDetailSelect(rows) {
+        const previous = eventDetail.value;
+        eventDetail.innerHTML =
+          `<option value="">Select an event…</option>` +
+          (rows || [])
+            .map(
+              (row) =>
+                `<option value="${escapeHtml(row.event_id)}">${escapeHtml(row.event_name)} (${escapeHtml(row.event_date || "—")})</option>`
+            )
+            .join("");
+        if (previous && [...eventDetail.options].some((o) => o.value === previous)) {
+          eventDetail.value = previous;
+          showEventDetail(previous);
+        }
+      }
+
+      function showEventDetail(eventId) {
+        const row = latestChartRows.find((r) => r.event_id === eventId);
+        if (!row) {
+          eventDetailStatus.textContent =
+            "Pick an event to see attended / total cards.";
+          return;
+        }
+        eventDetailStatus.textContent = `${row.event_name}: ${row.check_ins} attended / ${row.total_cards} total cards`;
+      }
+
+      eventDetail.addEventListener("change", () => {
+        showEventDetail(eventDetail.value);
+      });
+
       function updateChart(rows) {
+        latestChartRows = rows || [];
+        updateEventDetailSelect(latestChartRows);
+
         const emptyEl = document.getElementById("chart-empty");
         const canvas = document.getElementById("attendance-chart");
-        const labels = (rows || []).map((row) => row.event_name);
-        const values = (rows || []).map((row) => row.check_ins);
+        const labels = latestChartRows.map((row) =>
+          formatEventStamp(row.event_date, row.event_name)
+        );
+        const checkIns = latestChartRows.map((row) => row.check_ins);
+        const totals = latestChartRows.map((row) => row.total_cards);
 
         if (!labels.length) {
           emptyEl.classList.remove("hidden");
@@ -406,58 +640,84 @@ Results show here after a scan.</pre
 
         if (attendanceChart) {
           attendanceChart.data.labels = labels;
-          attendanceChart.data.datasets[0].data = values;
+          attendanceChart.data.datasets[0].data = checkIns;
+          attendanceChart.data.datasets[1].data = totals;
           attendanceChart.update();
           return;
         }
 
+        // Vertical bars:
+        //   solid fill  = how many people checked in
+        //   hollow outline = how many RFID cards the org has registered
         attendanceChart = new Chart(canvas, {
           type: "bar",
           data: {
             labels,
             datasets: [
               {
-                label: "Check-ins",
-                data: values,
-                backgroundColor: "rgba(15, 118, 110, 0.7)",
-                borderColor: "rgb(15, 118, 110)",
+                label: "Attendance",
+                data: checkIns,
+                backgroundColor: "rgba(4, 120, 87, 0.75)",
+                borderColor: "rgb(4, 120, 87)",
                 borderWidth: 1,
                 borderRadius: 4,
-                maxBarThickness: 28,
+                maxBarThickness: 36,
+                order: 1,
+              },
+              {
+                label: "Registered cards (org size)",
+                data: totals,
+                backgroundColor: "rgba(0, 0, 0, 0)",
+                borderColor: "rgb(15, 118, 110)",
+                borderWidth: 2,
+                borderRadius: 4,
+                maxBarThickness: 36,
+                order: 2,
               },
             ],
           },
           options: {
-            indexAxis: "y",
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: false },
+              legend: {
+                display: true,
+                position: "bottom",
+                labels: { boxWidth: 14, font: { size: 11 } },
+              },
               tooltip: {
                 callbacks: {
-                  label: (ctx) =>
-                    `${ctx.parsed.x} check-in${ctx.parsed.x === 1 ? "" : "s"}`,
+                  title: (items) => {
+                    const idx = items[0]?.dataIndex ?? 0;
+                    const row = latestChartRows[idx];
+                    return row
+                      ? `${row.event_name} · ${row.event_date || ""}`
+                      : "";
+                  },
+                  label: (ctx) => {
+                    const n = ctx.parsed.y;
+                    if (ctx.datasetIndex === 0) {
+                      return `${n} check-in${n === 1 ? "" : "s"}`;
+                    }
+                    return `${n} registered card${n === 1 ? "" : "s"}`;
+                  },
                 },
               },
             },
             scales: {
               x: {
+                ticks: {
+                  autoSkip: false,
+                  maxRotation: 0,
+                  minRotation: 0,
+                  font: { size: 10 },
+                },
+                grid: { display: false },
+              },
+              y: {
                 beginAtZero: true,
                 ticks: { precision: 0, stepSize: 1 },
                 grid: { color: "rgba(148, 163, 184, 0.25)" },
-              },
-              y: {
-                ticks: {
-                  autoSkip: false,
-                  font: { size: 11 },
-                  callback(value) {
-                    const label = this.getLabelForValue(value);
-                    return label.length > 28
-                      ? `${label.slice(0, 26)}…`
-                      : label;
-                  },
-                },
-                grid: { display: false },
               },
             },
           },
@@ -466,14 +726,14 @@ Results show here after a scan.</pre
 
       async function refreshChart() {
         const { data, error } = await listEventCheckInCounts();
-        if (error) {
+        if (error && (!data || !data.length)) {
           updateChart([]);
           document.getElementById("chart-empty").textContent =
             `Could not load chart: ${error.message}`;
           document.getElementById("chart-empty").classList.remove("hidden");
           return;
         }
-        updateChart(data);
+        updateChart(data || []);
       }
 
       async function refreshEvents() {
@@ -490,7 +750,7 @@ Results show here after a scan.</pre
         body.innerHTML = data
           .map(
             (ev) => `
-          <tr class="${ev.is_archived ? "bg-slate-50/80 text-slate-500" : ""}">
+          <tr class="${ev.is_archived ? "bg-slate-50/80 text-slate-500 dark:bg-slate-950/40" : ""}">
             <td class="max-w-[12rem] truncate px-3 py-2 font-medium" title="${escapeHtml(ev.event_name)}">${escapeHtml(ev.event_name)}</td>
             <td class="whitespace-nowrap px-3 py-2">${escapeHtml(ev.event_date)}</td>
             <td class="px-3 py-2">${escapeHtml(ev.point_value)}</td>
@@ -513,7 +773,7 @@ Results show here after a scan.</pre
             }
             adminStatus.textContent =
               "Event activated (others deactivated).";
-            adminStatus.className = "text-sm text-teal-800";
+            adminStatus.className = "text-sm text-emerald-800 dark:text-emerald-300";
             refreshEvents();
             refreshChart();
           });
@@ -531,7 +791,7 @@ Results show here after a scan.</pre
               return;
             }
             adminStatus.textContent = "Event deactivated.";
-            adminStatus.className = "text-sm text-teal-800";
+            adminStatus.className = "text-sm text-emerald-800 dark:text-emerald-300";
             refreshEvents();
             refreshChart();
           });
@@ -549,7 +809,7 @@ Results show here after a scan.</pre
               return;
             }
             adminStatus.textContent = "Event archived.";
-            adminStatus.className = "text-sm text-teal-800";
+            adminStatus.className = "text-sm text-emerald-800 dark:text-emerald-300";
             refreshEvents();
             refreshChart();
           });
@@ -570,17 +830,20 @@ Results show here after a scan.</pre
         body.innerHTML = data
           .map((m) => {
             const admin = isAdminRfid(m.rfid_uid);
+            const bound = memberHasRfid(m);
             return `
           <tr>
             <td class="px-3 py-2 font-medium">${escapeHtml(m.full_name)}</td>
             <td class="px-3 py-2">${escapeHtml(m.email)}</td>
-            <td class="px-3 py-2 font-mono text-xs">${escapeHtml(m.rfid_uid)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${
+              bound ? escapeHtml(m.rfid_uid) : '<span class="text-slate-400">— unbound</span>'
+            }</td>
             <td class="px-3 py-2">${
               admin
-                ? '<span class="rounded bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-900">Admin</span>'
+                ? '<span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">Admin</span>'
                 : '<span class="text-xs text-slate-500">Member</span>'
             }</td>
-            <td class="px-3 py-2 text-right font-semibold text-teal-800">${escapeHtml(m.total_points)}</td>
+            <td class="px-3 py-2 text-right font-semibold text-emerald-800 dark:text-emerald-300">${escapeHtml(m.total_points)}</td>
           </tr>`;
           })
           .join("");
@@ -625,7 +888,7 @@ Results show here after a scan.</pre
           refreshChart(),
         ]);
         adminStatus.textContent = "Admin data loaded.";
-        adminStatus.className = "text-sm text-slate-600";
+        adminStatus.className = "text-sm text-slate-600 dark:text-slate-400";
       }
 
       document
@@ -647,8 +910,9 @@ Results show here after a scan.</pre
           document.getElementById("point_value").value = "10";
           adminStatus.textContent =
             "Event created (inactive). Activate it when ready.";
-          adminStatus.className = "text-sm text-teal-800";
+          adminStatus.className = "text-sm text-emerald-800 dark:text-emerald-300";
           refreshEvents();
+          refreshChart();
         });
 
       document
@@ -667,13 +931,12 @@ Results show here after a scan.</pre
           refreshChart();
         });
 
-      // Default date input to today for convenience.
       const dateInput = document.getElementById("event_date");
       if (dateInput && !dateInput.value) {
         dateInput.value = new Date().toISOString().slice(0, 10);
       }
 
-      if (isUnlocked()) {
+      if (isUnlocked() && gateMember && isAdminMember(gateMember)) {
         unlock();
       }
     </script>

@@ -64,6 +64,17 @@
   Built: Dropped Docker as a supported path — cloud Supabase only; team directory + `is_archived` live in cloud SQL seed; console warn if keys still point at localhost.
   How it works: setup docs / examples only show `https://….supabase.co`; `database/lead_explore_seed.sql` is the paste-once seed for RLS + members + sample events; `supabase/` CLI folder marked legacy/unused.
 
+- **2026-11-08 17:15** — Files: `frontend/js/supabase.js`, `frontend/register.html`, `frontend/admin.html`, `database/phase2_nullable_rfid.sql` (created), `docs/LOCAL_SUPABASE.md`, `docs/HARDWARE_TAP_PATH.md`, `docs/AI_CODING_SKILLS.md`, `frontend/js/admin.local.js.example`, `backend/receive_scan.py`, `backend/README.md`, `docs/progress/backend-core.md`.
+  Built: Phase 2 Backend Core — Supabase Auth email/password helpers (no Google); account-first signup then RFID bind; Turner-facing session/admin/RFID helpers; themed chapter-admin shell with vertical attendance chart (solid check-ins + hollow org-size bars + event date stamps + per-event dropdown); Exit → `dashboard.html`; stable `POST /scan` contract + demo checklist; RLS left open for Kathleen.
+  How it works: `signUpWithPassword` / `signInWithPassword` create Auth users and ensure a `members` row linked by email (`rfid_uid` nullable after `phase2_nullable_rfid.sql`); `registerRfidForCurrentMember` binds a hex UID with duplicate/already-bound errors; `getSessionMember` / `isAdminMember` / `memberHasRfid` are what Turner imports; admin gate requires an ADMIN-UID member + quiet `admin.local.js` password; chart data from `listEventCheckInCounts` (includes `total_cards`).
+  **Hand to Turner (`member-ui`):** import `signUpWithPassword`, `signInWithPassword`, `signOut`, `getSessionMember`, `isAdminMember`, `memberHasRfid`, `registerRfidForCurrentMember`; admin rule = RFID contains `ADMIN`; remove public “Exec Admin” / Google from `index.html`; profile menu Admin link only when `isAdminMember`; hide register-card once `memberHasRfid` is true.
+  **Cloud one-time:** paste `database/phase2_nullable_rfid.sql`; for local Auth demos disable Confirm email in Supabase Auth settings.
+  Confirmed local secrets exist and stay gitignored (`supabase.local.js`, `admin.local.js`, `backend/.env`); `PHASE_2_PLAN.md` remains gitignored / uncommitted.
+
+- **2026-11-08 18:10** — Files: `frontend/js/supabase.js`, `frontend/register.html`, `frontend/admin.html`, `docs/progress/backend-core.md`.
+  Built: Extra beginner/demo comments on Auth + RFID bind helpers and the register/admin page scripts (step numbers, Turner import notes, gate/chart explainers).
+  How it works: comments spell out the Auth↔members email link, signup/bind panel switching, and admin unlock checks so the code is easier to demo out loud.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

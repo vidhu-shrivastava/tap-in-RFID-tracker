@@ -1,11 +1,11 @@
 /**
  * Tap-In — shared Supabase client helpers
- * Owner branch: branch-backend-core
+ * Owner branch: backend-core (Vidhu / Team Lead)
  *
  * HOW HTML PAGES SHOULD LOAD THIS FILE
  * ------------------------------------
  *   <script type="module">
- *     import { supabase, handleRfidScan } from "./js/supabase.js";
+ *     import { supabase, signInWithPassword, getSessionMember } from "./js/supabase.js";
  *   </script>
  *
  * SECRETS (do not put real keys in THIS file)
@@ -18,10 +18,28 @@
  * Expected tables: members, events, attendance_logs
  * Scan RPC: handle_rfid_scan (see database/rpc_handle_scan.sql)
  *
- * MVP AUTH (no password column on members)
- * ----------------------------------------
- * Sign-in looks up a member by email and stores { id, email, full_name }
- * in sessionStorage. Pages import the session helpers below.
+ * PHASE 2 AUTH (password email via Supabase Auth — no Google / OAuth)
+ * -------------------------------------------------------------------
+ * Long-term path (Turner should wire index.html to these):
+ *   signUpWithPassword / signInWithPassword / signOut / getSessionMember
+ *
+ * Members-row strategy = create-on-signup (linked by email):
+ *   - Auth signup creates auth.users, then inserts a members row if missing
+ *   - Seeded members (same email) are reused — we do NOT invent a second row
+ *   - members.id stays the table PK (may differ from auth.users.id on seeds)
+ *   - RFID is optional at signup; bind later with registerRfidForCurrentMember
+ *
+ * LEGACY (email-only sessionStorage) — keep for Turner's migration week:
+ *   getMemberByEmail + saveMemberSession / getMemberSession / clearMemberSession
+ * Prefer Auth helpers for new UI. Do not add Google providers.
+ *
+ * ADMIN RULE (single source of truth for Turner’s profile menu):
+ *   isAdminMember(member) → true when member.rfid_uid contains "ADMIN"
+ *   (case-insensitive). Example seed: Vidhu / ADMIN001.
+ *   Optional extra gate on admin.html still uses gitignored admin.local.js.
+ *
+ * RLS: keep open (anon/authenticated) until Kathleen’s hardware → backend/
+ * /scan path is proven end-to-end; tighten policies after that demo.
  */
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -40,7 +58,7 @@ if (
 /** Shared browser client — import this from any page instead of re-init. */
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/** sessionStorage key for the signed-in member (tab-scoped MVP session). */
+/** sessionStorage key for the signed-in member (tab-scoped MVP cache). */
 const MEMBER_SESSION_KEY = "tapInMemberSession";
 
 /**
@@ -62,12 +80,12 @@ export async function handleRfidScan(scannedUid) {
 }
 
 // ---------------------------------------------------------------------------
-// Member session (MVP — email lookup, not Supabase Auth)
+// Member session cache (still used after Auth so Turner’s pages keep working)
 // ---------------------------------------------------------------------------
 
 /**
  * Save a minimal member session after register / sign-in.
- * @param {{ id: string, email: string, full_name?: string }} member
+ * @param {{ id: string, email: string, full_name?: string, rfid_uid?: string|null, total_points?: number }} member
  */
 export function saveMemberSession(member) {
   if (!member || !member.id) {
@@ -79,27 +97,417 @@ export function saveMemberSession(member) {
       id: member.id,
       email: member.email || "",
       full_name: member.full_name || "",
+      rfid_uid: member.rfid_uid ?? null,
+      total_points: Number(member.total_points ?? 0),
     })
   );
 }
 
-/** @returns {{ id: string, email: string, full_name: string }|null} */
+/** @returns {{ id: string, email: string, full_name: string, rfid_uid: string|null, total_points: number }|null} */
 export function getMemberSession() {
   try {
     const raw = sessionStorage.getItem(MEMBER_SESSION_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed.id !== "string") return null;
-    return parsed;
+    return {
+      id: parsed.id,
+      email: parsed.email || "",
+      full_name: parsed.full_name || "",
+      rfid_uid: parsed.rfid_uid ?? null,
+      total_points: Number(parsed.total_points ?? 0),
+    };
   } catch (error) {
     console.error("[tap-in] could not read member session:", error);
     return null;
   }
 }
 
-/** Clear the MVP member session (sign out). */
+/** Clear the MVP member session cache (does not call Supabase Auth by itself). */
 export function clearMemberSession() {
   sessionStorage.removeItem(MEMBER_SESSION_KEY);
+}
+
+// ---------------------------------------------------------------------------
+// Admin / RFID product helpers (Turner imports these)
+// ---------------------------------------------------------------------------
+// Demo one-liner: "Admin = card UID contains ADMIN. Already have a card? memberHasRfid."
+
+/**
+ * True when an RFID UID is admin-priority (substring "ADMIN", case-insensitive).
+ * Example seed: Vidhu's card ADMIN001 → admin. Regular hex like A1B2C3D4 → member.
+ * @param {string|null|undefined} rfidUid
+ * @returns {boolean}
+ */
+export function isAdminRfid(rfidUid) {
+  return String(rfidUid || "")
+    .toUpperCase()
+    .includes("ADMIN");
+}
+
+/**
+ * Admin access rule for profile menus / gates.
+ * Turner: only show the Admin menu item when isAdminMember(member) is true.
+ * @param {{ rfid_uid?: string|null }|null|undefined} member
+ * @returns {boolean}
+ */
+export function isAdminMember(member) {
+  return isAdminRfid(member?.rfid_uid);
+}
+
+/**
+ * True when the member already has a bound RFID card.
+ * Turner: hide “Register card” on the dashboard when this returns true.
+ * @param {{ rfid_uid?: string|null }|null|undefined} member
+ * @returns {boolean}
+ */
+export function memberHasRfid(member) {
+  const uid = String(member?.rfid_uid || "").trim();
+  return uid.length > 0;
+}
+
+/**
+ * Clean up a typed UID: trim spaces, uppercase, require hex only (0-9 A-F).
+ * @param {string} rawUid
+ * @returns {{ uid: string|null, error: Error|null }}
+ */
+function normalizeRfidUid(rawUid) {
+  const uid = String(rawUid || "").trim().toUpperCase();
+  if (!uid) {
+    return { uid: null, error: new Error("RFID UID is required.") };
+  }
+  if (!/^[A-F0-9]+$/.test(uid)) {
+    return {
+      uid: null,
+      error: new Error("RFID UID must be hexadecimal (0-9 and A-F)."),
+    };
+  }
+  return { uid, error: null };
+}
+
+// ---------------------------------------------------------------------------
+// Supabase Auth — sign up / sign in / sign out / session member
+// ---------------------------------------------------------------------------
+// Two systems stay in sync:
+//   1) auth.users  → password login (Supabase Auth, no Google)
+//   2) members     → points / RFID / attendance (our app table)
+// We link them by email. Seeded teammates keep their existing members row.
+
+/**
+ * Make sure a `members` row exists for this email (create-on-signup).
+ * - Email already in members (seed) → reuse that row.
+ * - Brand new email → insert with rfid_uid = null (card comes later).
+ * @param {{ email: string, full_name?: string }} fields
+ * @returns {Promise<{ data: object|null, error: Error|null }>}
+ */
+async function ensureMemberRowForEmail(fields) {
+  const email = String(fields.email || "").trim().toLowerCase();
+  const full_name = String(fields.full_name || "").trim();
+
+  if (!email) {
+    return { data: null, error: new Error("Email is required.") };
+  }
+
+  // Step 1: look up existing member by email.
+  const existing = await getMemberByEmail(email);
+  if (existing.error) return existing;
+  if (existing.data) {
+    // Rare: fill in a blank name if Auth provided one.
+    if (full_name && !existing.data.full_name) {
+      const { data, error } = await supabase
+        .from("members")
+        .update({ full_name })
+        .eq("id", existing.data.id)
+        .select("id, full_name, email, rfid_uid, total_points")
+        .single();
+      if (error) {
+        console.error("[tap-in] ensureMemberRow name update failed:", error.message);
+        return { data: existing.data, error: null };
+      }
+      return { data, error: null };
+    }
+    return { data: existing.data, error: null };
+  }
+
+  if (!full_name) {
+    return {
+      data: null,
+      error: new Error("Full name is required to create a member account."),
+    };
+  }
+
+  // Step 2: brand-new email → insert member WITHOUT a card yet.
+  // Needs database/phase2_nullable_rfid.sql so rfid_uid can be NULL.
+  const { data, error } = await supabase
+    .from("members")
+    .insert({ full_name, email, rfid_uid: null, total_points: 0 })
+    .select("id, full_name, email, rfid_uid, total_points")
+    .single();
+
+  if (error) {
+    console.error("[tap-in] ensureMemberRow insert failed:", error.message);
+    // Cloud DB still has NOT NULL on rfid_uid → tell the teammate what SQL to paste.
+    if (/null value|rfid_uid/i.test(error.message || "")) {
+      return {
+        data: null,
+        error: new Error(
+          "Could not create member without RFID. Paste database/phase2_nullable_rfid.sql in the cloud SQL Editor, then try again."
+        ),
+      };
+    }
+    return { data: null, error };
+  }
+  return { data, error: null };
+}
+
+/**
+ * Create a password account (Supabase Auth) + matching members row.
+ * Flow: validate → auth.signUp → ensure members row → cache session locally.
+ * No Google / OAuth. For local demos, turn OFF “Confirm email” in Supabase Auth
+ * so this returns a live session right away.
+ *
+ * @param {{ email: string, password: string, full_name: string }} fields
+ * @returns {Promise<{ data: object|null, error: Error|null }>}
+ */
+export async function signUpWithPassword(fields) {
+  const email = String(fields.email || "").trim().toLowerCase();
+  const password = String(fields.password || "");
+  const full_name = String(fields.full_name || "").trim();
+
+  if (!email || !password || !full_name) {
+    return {
+      data: null,
+      error: new Error("Full name, email, and password are required."),
+    };
+  }
+  if (password.length < 6) {
+    return {
+      data: null,
+      error: new Error("Password must be at least 6 characters."),
+    };
+  }
+
+  // 1) Create the Auth user (password lives in Supabase Auth, not members).
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name } },
+  });
+
+  if (authError) {
+    console.error("[tap-in] signUpWithPassword Auth failed:", authError.message);
+    return { data: null, error: authError };
+  }
+
+  // 2) Mirror into our members table (points / RFID live here).
+  const { data: member, error: memberError } = await ensureMemberRowForEmail({
+    email,
+    full_name,
+  });
+  if (memberError) return { data: null, error: memberError };
+
+  // 3) Cache a small copy in sessionStorage so older pages keep working.
+  saveMemberSession(member);
+
+  // Confirm-email ON → Auth has no session yet; member row still exists.
+  if (!authData.session) {
+    return {
+      data: member,
+      error: new Error(
+        "Account created. Check your email to confirm, then sign in. (For local demos: Supabase → Authentication → Providers → Email → disable Confirm email.)"
+      ),
+    };
+  }
+
+  return { data: member, error: null };
+}
+
+/**
+ * Sign in with email + password, then load the members row for the UI.
+ * Flow: auth.signInWithPassword → find/create members row → saveMemberSession.
+ * @param {{ email: string, password: string }} fields
+ * @returns {Promise<{ data: object|null, error: Error|null }>}
+ */
+export async function signInWithPassword(fields) {
+  const email = String(fields.email || "").trim().toLowerCase();
+  const password = String(fields.password || "");
+
+  if (!email || !password) {
+    return {
+      data: null,
+      error: new Error("Email and password are required."),
+    };
+  }
+
+  // Ask Supabase Auth to verify the password.
+  const { error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (authError) {
+    console.error("[tap-in] signInWithPassword failed:", authError.message);
+    return { data: null, error: authError };
+  }
+
+  // Auth OK → load our app profile (points, RFID, name).
+  const { data: member, error: memberError } = await ensureMemberRowForEmail({
+    email,
+  });
+  if (memberError) return { data: null, error: memberError };
+  if (!member) {
+    return {
+      data: null,
+      error: new Error(
+        "Signed in, but no members row exists for that email. Use sign up first."
+      ),
+    };
+  }
+
+  saveMemberSession(member);
+  return { data: member, error: null };
+}
+
+/**
+ * Sign out: wipe local cache first, then tell Supabase Auth to end the session.
+ * @returns {Promise<{ error: Error|null }>}
+ */
+export async function signOut() {
+  clearMemberSession();
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("[tap-in] signOut failed:", error.message);
+    return { error };
+  }
+  return { error: null };
+}
+
+/**
+ * “Who is logged in right now?” — preferred helper for Turner’s pages.
+ * 1) If Supabase Auth has a session → look up members by that email.
+ * 2) Else fall back to the old sessionStorage cache (email-only MVP).
+ *
+ * @returns {Promise<{ data: object|null, error: Error|null }>}
+ */
+export async function getSessionMember() {
+  const { data: authWrap, error: authError } = await supabase.auth.getSession();
+  if (authError) {
+    console.error("[tap-in] getSessionMember Auth failed:", authError.message);
+    return { data: null, error: authError };
+  }
+
+  const session = authWrap?.session;
+  if (session?.user?.email) {
+    const { data: member, error } = await ensureMemberRowForEmail({
+      email: session.user.email,
+      full_name: session.user.user_metadata?.full_name || "",
+    });
+    if (error) return { data: null, error };
+    if (member) saveMemberSession(member);
+    return { data: member, error: null };
+  }
+
+  // Legacy fallback — email-only MVP cache (Turner can migrate off this later).
+  const cached = getMemberSession();
+  if (!cached) return { data: null, error: null };
+
+  const fresh = await getMemberById(cached.id);
+  if (fresh.data) {
+    saveMemberSession(fresh.data);
+    return { data: fresh.data, error: null };
+  }
+  return { data: cached, error: fresh.error };
+}
+
+/**
+ * Bind an RFID UID to the currently signed-in member (dashboard / register page).
+ * Guards: must be signed in, must not already have a card, UID must be unique.
+ *
+ * @param {string} rawUid
+ * @returns {Promise<{ data: object|null, error: Error|null }>}
+ */
+export async function registerRfidForCurrentMember(rawUid) {
+  // 1) Validate hex format.
+  const { uid, error: uidError } = normalizeRfidUid(rawUid);
+  if (uidError) return { data: null, error: uidError };
+
+  // 2) Need a signed-in member.
+  const { data: member, error: sessionError } = await getSessionMember();
+  if (sessionError) return { data: null, error: sessionError };
+  if (!member) {
+    return {
+      data: null,
+      error: new Error("Sign in before binding an RFID card."),
+    };
+  }
+
+  // 3) One card per account (MVP).
+  if (memberHasRfid(member)) {
+    return {
+      data: null,
+      error: new Error(
+        "This account already has an RFID card bound. Ask an admin if you need to change it."
+      ),
+    };
+  }
+
+  // 4) Another person already owns this UID?
+  const { data: taken, error: takenError } = await supabase
+    .from("members")
+    .select("id, email")
+    .ilike("rfid_uid", uid)
+    .maybeSingle();
+
+  if (takenError) {
+    console.error("[tap-in] registerRfid duplicate check failed:", takenError.message);
+    return { data: null, error: takenError };
+  }
+  if (taken && taken.id !== member.id) {
+    return {
+      data: null,
+      error: new Error("That RFID UID is already registered to another member."),
+    };
+  }
+
+  // 5) Write the UID onto this member’s row.
+  const { data, error } = await supabase
+    .from("members")
+    .update({ rfid_uid: uid })
+    .eq("id", member.id)
+    .select("id, full_name, email, rfid_uid, total_points")
+    .single();
+
+  if (error) {
+    console.error("[tap-in] registerRfidForCurrentMember failed:", error.message);
+    const msg = error.message || "";
+    if (/duplicate|unique/i.test(msg)) {
+      return {
+        data: null,
+        error: new Error("That RFID UID is already registered to another member."),
+      };
+    }
+    return { data: null, error };
+  }
+
+  saveMemberSession(data);
+  return { data, error: null };
+}
+
+/**
+ * How many members already have a card? Used as the hollow “org size” bar on admin chart.
+ * @returns {Promise<{ data: number, error: Error|null }>}
+ */
+export async function countRegisteredRfidCards() {
+  const { count, error } = await supabase
+    .from("members")
+    .select("id", { count: "exact", head: true })
+    .not("rfid_uid", "is", null);
+
+  if (error) {
+    console.error("[tap-in] countRegisteredRfidCards failed:", error.message);
+    return { data: 0, error };
+  }
+  return { data: Number(count ?? 0), error: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -150,26 +558,20 @@ export async function getMemberById(memberId) {
 }
 
 /**
- * Insert a new member + RFID card (registration form).
+ * Legacy: insert a new member + RFID in one step (old register.html path).
+ * Prefer signUpWithPassword + registerRfidForCurrentMember for Phase 2.
  * @param {{ full_name: string, email: string, rfid_uid: string }} fields
  * @returns {Promise<{ data: object|null, error: Error|null }>}
  */
 export async function registerMember(fields) {
   const full_name = String(fields.full_name || "").trim();
   const email = String(fields.email || "").trim().toLowerCase();
-  const rfid_uid = String(fields.rfid_uid || "").trim().toUpperCase();
+  const { uid: rfid_uid, error: uidError } = normalizeRfidUid(fields.rfid_uid);
 
-  if (!full_name || !email || !rfid_uid) {
+  if (!full_name || !email || uidError) {
     return {
       data: null,
-      error: new Error("Full name, email, and RFID UID are required."),
-    };
-  }
-
-  if (!/^[A-F0-9]+$/.test(rfid_uid)) {
-    return {
-      data: null,
-      error: new Error("RFID UID must be hexadecimal (0-9 and A-F)."),
+      error: uidError || new Error("Full name, email, and RFID UID are required."),
     };
   }
 
@@ -184,18 +586,6 @@ export async function registerMember(fields) {
     return { data: null, error };
   }
   return { data, error: null };
-}
-
-/**
- * True when an RFID UID is admin-priority (substring "ADMIN", case-insensitive).
- * Regular hex UIDs stay on the normal member registration path.
- * @param {string} rfidUid
- * @returns {boolean}
- */
-export function isAdminRfid(rfidUid) {
-  return String(rfidUid || "")
-    .toUpperCase()
-    .includes("ADMIN");
 }
 
 /**
@@ -322,10 +712,15 @@ export async function listEvents() {
 }
 
 /**
- * Check-in counts per event for the admin chart (excludes archived when column exists).
- * @returns {Promise<{ data: { event_name: string, check_ins: number }[], error: Error|null }>}
+ * Per-event check-in counts for the admin chart.
+ * Each row has: check_ins (solid bar) + total_cards (hollow org-size bar) + event_date.
+ * @returns {Promise<{ data: { event_id: string, event_name: string, event_date: string, check_ins: number, total_cards: number }[], error: Error|null }>}
  */
 export async function listEventCheckInCounts() {
+  // Same org-size number is attached to every event bar for comparison.
+  const cardsResult = await countRegisteredRfidCards();
+  const total_cards = cardsResult.data;
+
   let { data, error } = await supabase
     .from("events")
     .select("id, event_name, event_date, is_archived, attendance_logs(count)")
@@ -345,11 +740,14 @@ export async function listEventCheckInCounts() {
   }
 
   const rows = (data || []).map((ev) => ({
+    event_id: ev.id,
     event_name: ev.event_name,
+    event_date: ev.event_date,
     check_ins: Number(ev.attendance_logs?.[0]?.count ?? 0),
+    total_cards,
   }));
 
-  return { data: rows, error: null };
+  return { data: rows, error: cardsResult.error || null };
 }
 
 /**
@@ -513,4 +911,4 @@ export async function archiveEvent(eventId) {
   return { data, error: null };
 }
 
-console.log("[tap-in] supabase.js loaded — shared client ready.");
+console.log("[tap-in] supabase.js loaded — Auth + shared client ready.");

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Register a member and link an RFID card UID in Tap-IN."
+      content="Create a Tap-IN account, then bind an RFID card later from your dashboard."
     />
-    <title>Card Registration | Tap-IN</title>
+    <title>Create account | Tap-IN</title>
     <!-- Tailwind via CDN only — no build tools (team stack rule). -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -83,15 +83,17 @@
             href="index.html"
             class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
           >
-            Back home
+            Sign in
           </a>
         </div>
       </nav>
     </header>
 
     <main class="mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-12">
+      <!-- Mode A: create Auth account (no RFID yet) -->
       <section
-        aria-labelledby="register-heading"
+        id="signup-panel"
+        aria-labelledby="signup-heading"
         class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-lg shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:ring-1 dark:ring-emerald-500/30 dark:shadow-[0_0_22px_rgba(16,185,129,0.12)] sm:p-8"
       >
         <div class="mb-8">
@@ -101,19 +103,18 @@
             Tap-IN Member Setup
           </p>
           <h1
-            id="register-heading"
+            id="signup-heading"
             class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
           >
-            Register an RFID card
+            Create your account
           </h1>
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Enter the member details and the hexadecimal UID printed by your
-            card reader.
+            Make an account first. You can bind an RFID card later from your
+            dashboard after you sign in.
           </p>
         </div>
 
-        <!-- Same fields (name, email, RFID); submit writes to Supabase members. -->
-        <form id="registration-form" class="space-y-5" novalidate>
+        <form id="signup-form" class="space-y-5" novalidate>
           <div>
             <label
               class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
@@ -165,6 +166,73 @@
           <div>
             <label
               class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
+              for="password"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="6"
+              required
+              class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
+              placeholder="At least 6 characters"
+            />
+            <p
+              id="password-error"
+              class="mt-2 hidden text-sm text-rose-700 dark:text-rose-300"
+              role="alert"
+            ></p>
+          </div>
+
+          <button
+            id="signup-button"
+            type="submit"
+            class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-slate-900 sm:w-auto"
+          >
+            Create account
+          </button>
+        </form>
+
+        <p
+          id="signup-status"
+          class="mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </section>
+
+      <!-- Mode B: signed-in member binds RFID (also what Turner’s dashboard will call) -->
+      <section
+        id="bind-panel"
+        hidden
+        aria-labelledby="bind-heading"
+        class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-lg shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 dark:ring-1 dark:ring-emerald-500/30 dark:shadow-[0_0_22px_rgba(16,185,129,0.12)] sm:p-8"
+      >
+        <div class="mb-8">
+          <p
+            class="text-sm font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300"
+          >
+            Tap-IN Card Bind
+          </p>
+          <h1
+            id="bind-heading"
+            class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            Bind your RFID card
+          </h1>
+          <p id="bind-intro" class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Enter the hexadecimal UID from your card reader. You only do this
+            once per account.
+          </p>
+        </div>
+
+        <form id="bind-form" class="space-y-5" novalidate>
+          <div>
+            <label
+              class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
               for="rfid_uid"
             >
               RFID hex string
@@ -189,49 +257,62 @@
           </div>
 
           <button
-            id="submit-button"
+            id="bind-button"
             type="submit"
             class="w-full rounded-lg bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition hover:from-green-800 hover:via-emerald-800 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-slate-900 sm:w-auto"
           >
-            Submit registration
+            Bind card
           </button>
         </form>
 
-        <!-- Live status: validation errors or real Supabase insert result. -->
         <p
-          id="form-status"
+          id="bind-status"
           class="mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300"
           role="status"
           aria-live="polite"
         ></p>
+
+        <p class="mt-6 text-sm">
+          <a
+            class="font-semibold text-emerald-800 underline dark:text-emerald-300"
+            href="dashboard.html"
+            >Skip for now → dashboard</a
+          >
+        </p>
+      </section>
+
+      <!-- Mode C: already bound -->
+      <section
+        id="done-panel"
+        hidden
+        class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-lg shadow-emerald-950/10 dark:border-emerald-800 dark:bg-slate-900 sm:p-8"
+      >
+        <h1 class="text-2xl font-bold tracking-tight">Card already bound</h1>
+        <p id="done-copy" class="mt-2 text-sm text-slate-600 dark:text-slate-400"></p>
+        <a
+          href="dashboard.html"
+          class="mt-6 inline-block rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900"
+          >Go to dashboard</a
+        >
       </section>
     </main>
 
     <script type="module">
-      import { registerMember, saveMemberSession } from "./js/supabase.js";
+      // Account-first page:
+      //   no session        → signup panel (email + password)
+      //   signed in, no card → bind panel (RFID only)
+      //   already has card  → done panel
+      import {
+        signUpWithPassword,
+        getSessionMember,
+        memberHasRfid,
+        registerRfidForCurrentMember,
+      } from "./js/supabase.js";
 
-      const registrationForm = document.querySelector("#registration-form");
-      const formStatus = document.querySelector("#form-status");
-      const submitButton = document.querySelector("#submit-button");
+      const signupPanel = document.querySelector("#signup-panel");
+      const bindPanel = document.querySelector("#bind-panel");
+      const donePanel = document.querySelector("#done-panel");
       const themeToggle = document.querySelector("#theme-toggle");
-
-      const fields = [
-        {
-          input: document.querySelector("#full_name"),
-          error: document.querySelector("#full_name-error"),
-          message: "Please enter a full name.",
-        },
-        {
-          input: document.querySelector("#email"),
-          error: document.querySelector("#email-error"),
-          message: "Please enter a valid email address.",
-        },
-        {
-          input: document.querySelector("#rfid_uid"),
-          error: document.querySelector("#rfid_uid-error"),
-          message: "Enter a hexadecimal RFID UID (0-9 and A-F only).",
-        },
-      ];
 
       function setThemeLabel() {
         const isDark = document.documentElement.classList.contains("dark");
@@ -253,89 +334,161 @@
         setThemeLabel();
       });
 
-      function clearErrors() {
-        fields.forEach(({ input, error }) => {
-          error.textContent = "";
-          error.classList.add("hidden");
-          input.removeAttribute("aria-invalid");
-        });
-        formStatus.textContent = "";
+      // Only one of the three panels is visible at a time.
+      function showOnly(panel) {
+        signupPanel.hidden = panel !== signupPanel;
+        bindPanel.hidden = panel !== bindPanel;
+        donePanel.hidden = panel !== donePanel;
       }
 
-      function showError(field, message) {
-        field.error.textContent = message;
-        field.error.classList.remove("hidden");
-        field.input.setAttribute("aria-invalid", "true");
+      function showFieldError(id, message) {
+        const el = document.querySelector(`#${id}-error`);
+        const input = document.querySelector(`#${id}`);
+        if (!el || !input) return;
+        el.textContent = message;
+        el.classList.remove("hidden");
+        input.setAttribute("aria-invalid", "true");
       }
 
-      // Validate in the browser, then INSERT into Supabase members.
-      registrationForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        clearErrors();
-
-        let firstInvalid = null;
-
-        fields.forEach((field) => {
-          const value = field.input.value.trim();
-          if (!field.input.checkValidity() || value === "") {
-            showError(field, field.message);
-            if (!firstInvalid) firstInvalid = field.input;
+      function clearFieldErrors(ids) {
+        ids.forEach((id) => {
+          const el = document.querySelector(`#${id}-error`);
+          const input = document.querySelector(`#${id}`);
+          if (el) {
+            el.textContent = "";
+            el.classList.add("hidden");
           }
+          if (input) input.removeAttribute("aria-invalid");
+        });
+      }
+
+      // Pick the right panel from the current session.
+      const { data: member } = await getSessionMember();
+      if (member && memberHasRfid(member)) {
+        document.querySelector("#done-copy").textContent =
+          `You're signed in as ${member.full_name || member.email}. RFID ${member.rfid_uid} is already linked — Turner can hide the register-card option with memberHasRfid().`;
+        showOnly(donePanel);
+      } else if (member) {
+        document.querySelector("#bind-intro").textContent =
+          `Signed in as ${member.full_name || member.email}. Enter your card UID to finish setup.`;
+        showOnly(bindPanel);
+      } else {
+        showOnly(signupPanel);
+      }
+
+      // Create Auth account (no RFID required yet).
+      document
+        .querySelector("#signup-form")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          clearFieldErrors(["full_name", "email", "password"]);
+          const status = document.querySelector("#signup-status");
+          const button = document.querySelector("#signup-button");
+
+          const full_name = document.querySelector("#full_name").value.trim();
+          const email = document.querySelector("#email").value.trim();
+          const password = document.querySelector("#password").value;
+
+          // Quick browser-side checks before we hit Supabase.
+          let invalid = false;
+          if (!full_name) {
+            showFieldError("full_name", "Please enter a full name.");
+            invalid = true;
+          }
+          if (!email || !document.querySelector("#email").checkValidity()) {
+            showFieldError("email", "Please enter a valid email address.");
+            invalid = true;
+          }
+          if (!password || password.length < 6) {
+            showFieldError("password", "Password must be at least 6 characters.");
+            invalid = true;
+          }
+          if (invalid) {
+            status.textContent = "Please fix the highlighted fields and try again.";
+            status.className =
+              "mt-5 min-h-6 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+
+          status.className =
+            "mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300";
+          status.textContent = "Creating your account…";
+          button.disabled = true;
+
+          const { data, error } = await signUpWithPassword({
+            full_name,
+            email,
+            password,
+          });
+
+          button.disabled = false;
+
+          // Hard failure (Auth rejected / DB error) — stay on signup.
+          if (error && !data) {
+            status.textContent = error.message || "Sign up failed.";
+            status.className =
+              "mt-5 min-h-6 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+
+          // Soft warning (e.g. confirm-email) — member exists; still offer bind.
+          if (error && data) {
+            status.textContent = error.message;
+            status.className =
+              "mt-5 min-h-6 text-sm text-amber-800 dark:text-amber-300";
+          } else {
+            status.textContent = "Account created.";
+            status.className =
+              "mt-5 min-h-6 text-sm text-emerald-800 dark:text-emerald-300";
+          }
+
+          document.querySelector("#bind-intro").textContent =
+            `Signed in as ${data.full_name || data.email}. Enter your card UID when you have it — or skip to the dashboard.`;
+          showOnly(bindPanel);
         });
 
-        if (firstInvalid) {
-          formStatus.textContent = "Please fix the highlighted fields and try again.";
-          formStatus.classList.remove(
-            "text-emerald-800",
-            "dark:text-emerald-300"
-          );
-          formStatus.classList.add("text-rose-700", "dark:text-rose-300");
-          firstInvalid.focus();
-          return;
-        }
+      // Attach a hex UID to the signed-in member (same helper Turner will call).
+      document
+        .querySelector("#bind-form")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          clearFieldErrors(["rfid_uid"]);
+          const status = document.querySelector("#bind-status");
+          const button = document.querySelector("#bind-button");
+          const input = document.querySelector("#rfid_uid");
+          const value = input.value.trim();
 
-        formStatus.classList.remove("text-rose-700", "dark:text-rose-300");
-        formStatus.classList.add("text-slate-700", "dark:text-slate-300");
-        formStatus.textContent = "Saving member to Supabase…";
-        submitButton.disabled = true;
+          if (!input.checkValidity() || value === "") {
+            showFieldError(
+              "rfid_uid",
+              "Enter a hexadecimal RFID UID (0-9 and A-F only)."
+            );
+            status.textContent = "Please fix the highlighted fields and try again.";
+            status.className =
+              "mt-5 min-h-6 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
 
-        const { data: member, error } = await registerMember({
-          full_name: document.querySelector("#full_name").value,
-          email: document.querySelector("#email").value,
-          rfid_uid: document.querySelector("#rfid_uid").value,
+          status.className =
+            "mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300";
+          status.textContent = "Binding RFID card…";
+          button.disabled = true;
+
+          const { data, error } = await registerRfidForCurrentMember(value);
+          button.disabled = false;
+
+          if (error) {
+            status.textContent = error.message || "Could not bind RFID.";
+            status.className =
+              "mt-5 min-h-6 text-sm text-rose-700 dark:text-rose-300";
+            return;
+          }
+
+          status.textContent = `Bound ${data.rfid_uid}. Opening dashboard…`;
+          status.className =
+            "mt-5 min-h-6 text-sm text-emerald-800 dark:text-emerald-300";
+          window.location.href = "dashboard.html";
         });
-
-        submitButton.disabled = false;
-
-        if (error) {
-          const msg = error.message || "Registration failed.";
-          const isDuplicate =
-            msg.toLowerCase().includes("duplicate") ||
-            msg.toLowerCase().includes("unique");
-          formStatus.textContent = isDuplicate
-            ? "That email or RFID UID is already registered."
-            : `Could not save member: ${msg}`;
-          formStatus.classList.remove(
-            "text-emerald-800",
-            "dark:text-emerald-300",
-            "text-slate-700",
-            "dark:text-slate-300"
-          );
-          formStatus.classList.add("text-rose-700", "dark:text-rose-300");
-          return;
-        }
-
-        saveMemberSession(member);
-        formStatus.classList.remove(
-          "text-rose-700",
-          "dark:text-rose-300",
-          "text-slate-700",
-          "dark:text-slate-300"
-        );
-        formStatus.classList.add("text-emerald-800", "dark:text-emerald-300");
-        formStatus.textContent = "Registered! Opening your dashboard…";
-        window.location.href = "dashboard.html";
-      });
     </script>
   </body>
 </html>
