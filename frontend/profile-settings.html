@@ -104,7 +104,7 @@
     </main>
 
     <script type="module">
-      import { getMemberSession } from "./js/supabase.js";
+      import { getSessionMember } from "./js/supabase.js";
 
       const profileForm = document.getElementById("profile-form");
       const profilePictureInput = document.getElementById("profile-picture");
@@ -113,13 +113,18 @@
       const avatarInitials = document.getElementById("avatar-initials");
       const avatarPreview = document.getElementById("avatar-preview");
       const profileStatus = document.getElementById("profile-status");
-      const session = getMemberSession();
       let accountName = "Member";
       let selectedPicture = "";
       let imageIsReading = false;
 
-      if (!session) {
+      const { data: member, error: sessionError } = await getSessionMember();
+      if (sessionError) {
+        profileStatus.textContent =
+          "Could not restore your session. Return to the dashboard and try again.";
+      }
+      if (!member) {
         window.location.href = "index.html";
+        throw new Error("No signed-in member — redirecting to index.");
       }
 
       function setAvatar(picture, name) {
@@ -144,8 +149,8 @@
       try {
         const savedProfile = localStorage.getItem("tapInMemberProfile");
         accountName =
-          typeof session?.full_name === "string" && session.full_name.trim()
-            ? session.full_name.trim()
+          typeof member?.full_name === "string" && member.full_name.trim()
+            ? member.full_name.trim()
             : "Member";
         accountNameDisplay.textContent = accountName;
 

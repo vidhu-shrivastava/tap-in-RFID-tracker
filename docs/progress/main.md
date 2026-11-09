@@ -40,6 +40,10 @@
   Built: Rewrote root README for post-merge reality — what works vs left, backend receive path, clarified owners (Turner / Kathleen / Jayati / Kailash / Vidhu), and Week-2+ checklists including Turner member-UI polish.
   How it works: README is now the team’s single status + assignment board so people finishing Week 1 (esp. Turner) can pick concrete next files without guessing.
 
+- **2026-11-08 22:30** — Files: `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html`, `frontend/register.html`, `docs/progress/main.md`.
+  Built: Post-merge Phase 2 glue — hooked Turner’s member UI to Vidhu’s Auth helpers after `backend-core` + `member-ui` landed on `main`.
+  How it works: `index.html` calls `signInWithPassword` / `signUpWithPassword` (no preview stubs); dashboard uses `getSessionMember`, `isAdminMember`, `memberHasRfid`, and `signOut`; profile settings loads the real session name; RFID bind stays on `register.html` and the dashboard CTA hides once a card is bound.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

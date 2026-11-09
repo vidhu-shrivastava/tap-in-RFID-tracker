@@ -129,12 +129,12 @@
         </div>
       </section>
 
-      <section id="rfid-register-row" aria-label="RFID registration" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <section id="rfid-register-row" aria-label="RFID registration" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="text-lg font-semibold">RFID card</h2>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Register your card once so tap-ins can log your attendance.
+              Bind your card once so tap-ins can log your attendance.
             </p>
           </div>
           <a id="rfid-register-link" href="register.html" class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
@@ -175,11 +175,11 @@
 
     <script type="module">
       import {
-        getMemberSession,
-        clearMemberSession,
-        getMemberById,
+        getSessionMember,
         getMemberAttendance,
-        isAdminRfid,
+        isAdminMember,
+        memberHasRfid,
+        signOut,
       } from "./js/supabase.js";
 
       const menuButton = document.getElementById("account-menu-button");
@@ -189,14 +189,9 @@
       const statusEl = document.getElementById("profile-load-status");
       const adminMenuItem = document.getElementById("admin-menu-item");
       const rfidStatusCard = document.getElementById("rfid-status-card");
-      const rfidRegisterLink = document.getElementById("rfid-register-link");
+      const rfidRegisterRow = document.getElementById("rfid-register-row");
       const POINTS_GOAL = 100;
       let themeTransitionTimer;
-
-      const session = getMemberSession();
-      if (!session) {
-        window.location.href = "index.html";
-      }
 
       function showProfile(profileName, preferredFromStorage) {
         const preferredName =
@@ -280,42 +275,32 @@
       }
 
       function renderRfidState(member) {
-        const hasCard = typeof member.rfid_uid === "string" && member.rfid_uid.trim();
-        const registerButton = document.getElementById("rfid-register-link");
-
-        if (hasCard) {
-          rfidStatusCard.textContent = "RFID card registered — you are ready to check in.";
-          rfidStatusCard.className = "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/35 dark:text-emerald-200";
-          registerButton.classList.add("hidden");
-        } else {
-          rfidStatusCard.textContent = "RFID card not bound yet. Register one from here to finish setup.";
-          rfidStatusCard.className = "mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100";
-          registerButton.classList.remove("hidden");
+        if (memberHasRfid(member)) {
+          rfidStatusCard.textContent = `RFID card registered (${member.rfid_uid}) — you are ready to check in.`;
+          rfidStatusCard.className =
+            "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/35 dark:text-emerald-200";
+          rfidRegisterRow.classList.add("hidden");
+          return;
         }
+
+        rfidStatusCard.textContent =
+          "RFID card not bound yet. Register one from here to finish setup.";
+        rfidStatusCard.className =
+          "mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100";
+        rfidRegisterRow.classList.remove("hidden");
       }
 
       async function loadDashboard() {
-        let member = null;
-
-        if (String(session.id || "").startsWith("preview-")) {
-          const preview = JSON.parse(localStorage.getItem("tapInPreviewMember") || "{}") || {};
-          member = {
-            id: session.id,
-            full_name: session.full_name || preview.full_name || "Member",
-            email: session.email || preview.email || "guest@example.com",
-            rfid_uid: "",
-            total_points: 0,
-          };
-          statusEl.textContent = "Preview account loaded — bind your RFID card when you are ready.";
-          statusEl.className = "mt-4 text-sm text-amber-700 dark:text-amber-300";
-        } else {
-          const { data: memberRow, error: memberError } = await getMemberById(session.id);
-          if (memberError || !memberRow) {
-            statusEl.textContent = "Could not load your member row. Sign in again or check Supabase.";
-            statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
-            return;
-          }
-          member = memberRow;
+        const { data: member, error: memberError } = await getSessionMember();
+        if (memberError) {
+          statusEl.textContent =
+            "Could not restore your session. Sign in again or check Supabase.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
+          return;
+        }
+        if (!member) {
+          window.location.href = "index.html";
+          return;
         }
 
         let preferredName = "";
@@ -325,7 +310,8 @@
           if (savedProfile) {
             const profile = JSON.parse(savedProfile);
             if (profile && typeof profile === "object") {
-              preferredName = typeof profile.preferredName === "string" ? profile.preferredName : "";
+              preferredName =
+                typeof profile.preferredName === "string" ? profile.preferredName : "";
               picture = typeof profile.picture === "string" ? profile.picture : "";
             }
           }
@@ -339,29 +325,18 @@
         renderPoints(member.total_points);
         renderRfidState(member);
 
-        if (String(session.id || "").startsWith("preview-")) {
+        adminMenuItem.classList.toggle("hidden", !isAdminMember(member));
+
+        const { data: logs, error: logsError } = await getMemberAttendance(member.id);
+        if (logsError) {
+          statusEl.textContent = "Member loaded, but attendance history failed to load.";
+          statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
           renderAttendance([]);
-        } else {
-          const { data: logs, error: logsError } = await getMemberAttendance(member.id);
-          if (logsError) {
-            statusEl.textContent = "Member loaded, but attendance history failed to load.";
-            statusEl.className = "mt-4 text-sm text-rose-700 dark:text-rose-300";
-            renderAttendance([]);
-            return;
-          }
-          renderAttendance(logs);
+          return;
         }
 
-        if (isAdminRfid(member.rfid_uid || "")) {
-          adminMenuItem.classList.remove("hidden");
-        } else {
-          adminMenuItem.classList.add("hidden");
-        }
-
-        const isPreviewAccount = String(session.id || "").startsWith("preview-");
-        statusEl.textContent = isPreviewAccount
-          ? "Preview account active — finish by binding your RFID card."
-          : "Your dashboard is ready.";
+        renderAttendance(logs);
+        statusEl.textContent = "Your dashboard is ready.";
         statusEl.className = "mt-4 text-sm text-slate-600 dark:text-slate-300";
       }
 
@@ -402,8 +377,13 @@
         }, 1500);
       });
 
-      signOutButton.addEventListener("click", () => {
-        clearMemberSession();
+      signOutButton.addEventListener("click", async () => {
+        await signOut();
+        try {
+          localStorage.removeItem("tapInPreviewMember");
+        } catch (error) {
+          // ignore
+        }
         window.location.href = "index.html";
       });
 

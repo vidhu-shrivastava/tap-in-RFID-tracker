@@ -366,7 +366,7 @@
       const { data: member } = await getSessionMember();
       if (member && memberHasRfid(member)) {
         document.querySelector("#done-copy").textContent =
-          `You're signed in as ${member.full_name || member.email}. RFID ${member.rfid_uid} is already linked — Turner can hide the register-card option with memberHasRfid().`;
+          `You're signed in as ${member.full_name || member.email}. RFID ${member.rfid_uid} is already linked.`;
         showOnly(donePanel);
       } else if (member) {
         document.querySelector("#bind-intro").textContent =

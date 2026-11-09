@@ -166,9 +166,9 @@
 
     <script type="module">
       import {
-        getMemberByEmail,
-        saveMemberSession,
-        getMemberSession,
+        signInWithPassword,
+        signUpWithPassword,
+        getSessionMember,
       } from "./js/supabase.js";
 
       const signInForm = document.getElementById("sign-in-form");
@@ -222,48 +222,44 @@
         showSignUpTab.classList.toggle("dark:text-slate-300", !isSignUp);
       }
 
+      function seedCosmeticProfile(member) {
+        const fullName =
+          typeof member?.full_name === "string" && member.full_name.trim()
+            ? member.full_name.trim()
+            : "Member";
+        try {
+          const existing = localStorage.getItem("tapInMemberProfile");
+          if (existing) return;
+          localStorage.setItem(
+            "tapInMemberProfile",
+            JSON.stringify({
+              name: fullName,
+              preferredName: fullName,
+              picture: "",
+            })
+          );
+        } catch (error) {
+          console.error("Could not seed cosmetic profile settings.", error);
+        }
+      }
+
       showSignInTab.addEventListener("click", () => showTab("signin"));
       showSignUpTab.addEventListener("click", () => showTab("signup"));
 
-      if (getMemberSession()) {
+      // Already signed in? Skip the gate.
+      const { data: existingMember } = await getSessionMember();
+      if (existingMember) {
         window.location.href = "dashboard.html";
-      }
-
-      function createPreviewSession(fullName, email) {
-        const previewSession = {
-          id: `preview-${Date.now()}`,
-          full_name: fullName.trim(),
-          email: email.trim().toLowerCase(),
-        };
-
-        const profile = {
-          name: previewSession.full_name,
-          preferredName: previewSession.full_name,
-          picture: "",
-        };
-
-        localStorage.setItem("tapInMemberProfile", JSON.stringify(profile));
-        localStorage.setItem(
-          "tapInPreviewMember",
-          JSON.stringify({
-            full_name: previewSession.full_name,
-            email: previewSession.email,
-            password: document.getElementById("signup-password").value,
-          })
-        );
-
-        saveMemberSession(previewSession);
-        return previewSession;
       }
 
       signInForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        signInStatus.textContent = "Looking up your account…";
+        signInStatus.textContent = "Signing you in…";
         signInStatus.className = "min-h-5 text-sm text-slate-600 dark:text-slate-300";
         signInButton.disabled = true;
 
         const email = document.getElementById("signin-email").value.trim();
-        const password = document.getElementById("signin-password").value.trim();
+        const password = document.getElementById("signin-password").value;
 
         if (!email || !password) {
           signInStatus.textContent = "Please enter both your email and password.";
@@ -272,23 +268,21 @@
           return;
         }
 
-        const { data: member, error } = await getMemberByEmail(email);
+        const { data: member, error } = await signInWithPassword({ email, password });
         signInButton.disabled = false;
 
-        if (error) {
-          signInStatus.textContent = "Could not reach Supabase. Check your local config and try again.";
+        if (error || !member) {
+          const message = error?.message || "Sign in failed. Check your email and password.";
+          signInStatus.textContent = message;
           signInStatus.className = "min-h-5 text-sm text-rose-700 dark:text-rose-300";
+          if (/Invalid login credentials|Email not confirmed/i.test(message)) {
+            // Stay on sign-in; confirm-email or bad password are Auth issues.
+            return;
+          }
           return;
         }
 
-        if (!member) {
-          signInStatus.textContent = "No account found for that email. Create an account first, then bind your RFID card from the dashboard.";
-          signInStatus.className = "min-h-5 text-sm text-rose-700 dark:text-rose-300";
-          showTab("signup");
-          return;
-        }
-
-        saveMemberSession(member);
+        seedCosmeticProfile(member);
         signInStatus.textContent = "Opening your dashboard…";
         signInStatus.className = "min-h-5 text-sm text-emerald-800 dark:text-emerald-300";
         window.location.href = "dashboard.html";
@@ -296,13 +290,13 @@
 
       signUpForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        signUpStatus.textContent = "Saving your account details…";
+        signUpStatus.textContent = "Creating your account…";
         signUpStatus.className = "min-h-5 text-sm text-slate-600 dark:text-slate-300";
         signUpButton.disabled = true;
 
         const fullName = document.getElementById("signup-name").value.trim();
         const email = document.getElementById("signup-email").value.trim();
-        const password = document.getElementById("signup-password").value.trim();
+        const password = document.getElementById("signup-password").value;
 
         if (!fullName || !email || !password) {
           signUpStatus.textContent = "Please fill in your full name, email, and password.";
@@ -311,12 +305,41 @@
           return;
         }
 
-        const savedPreview = createPreviewSession(fullName, email);
-        signUpStatus.textContent = "Account created. Add your RFID card from the dashboard next.";
-        signUpStatus.className = "min-h-5 text-sm text-emerald-800 dark:text-emerald-300";
+        if (password.length < 6) {
+          signUpStatus.textContent = "Password must be at least 6 characters.";
+          signUpStatus.className = "min-h-5 text-sm text-rose-700 dark:text-rose-300";
+          signUpButton.disabled = false;
+          return;
+        }
+
+        const { data: member, error } = await signUpWithPassword({
+          full_name: fullName,
+          email,
+          password,
+        });
         signUpButton.disabled = false;
 
-        console.info("[tap-in] demo account created (stub):", savedPreview, { passwordProvided: !!password });
+        // Hard failure — no members row created.
+        if (error && !member) {
+          signUpStatus.textContent = error.message || "Could not create your account.";
+          signUpStatus.className = "min-h-5 text-sm text-rose-700 dark:text-rose-300";
+          return;
+        }
+
+        seedCosmeticProfile(member);
+
+        // Soft warning (e.g. confirm-email still on) — account exists; send them in.
+        if (error && member) {
+          signUpStatus.textContent = error.message;
+          signUpStatus.className = "min-h-5 text-sm text-amber-800 dark:text-amber-300";
+          window.setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1200);
+          return;
+        }
+
+        signUpStatus.textContent = "Account created. Add your RFID card from the dashboard next.";
+        signUpStatus.className = "min-h-5 text-sm text-emerald-800 dark:text-emerald-300";
         window.location.href = "dashboard.html";
       });
     </script>
