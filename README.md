@@ -1,20 +1,8 @@
 # Tap-In RFID Attendance Tracker
 
-University engineering-fraternity SWE MVP: members tap an RFID card at events, attendance is logged in Supabase, and points show up on simple web dashboards.
+**Status: DONE (MVP complete — Phase 1 + Phase 2)**
 
-| Phase | Focus |
-|-------|--------|
-| **Phase 1** | Schema, scan RPC, member + admin web UIs, cloud Supabase wiring, Arduino UID read over Serial |
-| **Phase 2** | Account auth, polished dashboards, hardware WiFi tap path (Arduino → receive server → DB) |
-
----
-
-## What it does
-
-1. **Hardware** scans an RFID card (Arduino UNO R4 WiFi + RC522; OLED + buzzer planned).
-2. **Database** stores members, events, and attendance logs (Supabase PostgreSQL + `handle_rfid_scan` RPC).
-3. **Web UI** lets members register / see points, and execs manage events and attendance analytics.
-4. **Backend receive** accepts `POST /scan` from the scanner so secrets stay off the firmware (KTP host later).
+University engineering-fraternity SWE project: members create an account, bind an RFID card once, tap in at events, and see attendance points on simple web dashboards. Execs manage events and analytics from a gated admin shell.
 
 ```text
 Card → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_logs + points → dashboards
@@ -22,16 +10,32 @@ Card → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_lo
 
 ---
 
+## What shipped
+
+| Area | Done |
+|------|------|
+| **Auth** | Email + password via Supabase Auth (no Google). Account first, RFID bind later. |
+| **Member UI** | Sign-in / sign-up, dashboard (points + history), profile settings, theme toggle |
+| **RFID bind** | One-time bind from dashboard → `register.html`; CTA hides once bound |
+| **Admin** | Profile-menu Admin link only if member RFID contains `ADMIN`; chapter password gate; events + vertical attendance chart + simulate scan |
+| **Database** | `members`, `events`, `attendance_logs` + `handle_rfid_scan` RPC |
+| **Hardware receive** | `backend/receive_scan.py` accepts `POST /scan` so keys stay off firmware |
+| **Hardware sketch** | Arduino UNO R4 WiFi + RC522 UID read (Serial); WiFi tap path documented |
+
+---
+
 ## Tech stack
 
 | Layer | Choice |
 |-------|--------|
-| Frontend | Vanilla HTML5, Tailwind CSS via CDN, Vanilla JS |
-| Data | Cloud Supabase (PostgreSQL + JS client via CDN) |
+| Frontend | Vanilla HTML5, Tailwind CDN, Vanilla JS |
+| Data | Cloud Supabase (PostgreSQL + JS client CDN) |
+| Auth | Supabase Auth email/password |
 | Hardware receive | `backend/receive_scan.py` (stdlib Python) |
-| Hardware | Arduino C++ on UNO R4 WiFi |
+| Hardware | Arduino C++ on UNO R4 WiFi + RC522 |
 | Analytics | Chart.js CDN (admin) |
-| Tooling | VS Code + GitHub Copilot — no React, bundlers, or Flask/Next |
+
+No React, bundlers, Flask, Next, or Docker.
 
 Guides: [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md) · [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md) · [`docs/HARDWARE_TAP_PATH.md`](docs/HARDWARE_TAP_PATH.md) · [`docs/GIT_AND_COPILOT_GUIDE.md`](docs/GIT_AND_COPILOT_GUIDE.md)
 
@@ -41,56 +45,70 @@ Guides: [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md) · [`docs/LOCAL_S
 
 ```text
 /
-├── docs/                       # Guides + per-branch progress logs
-├── database/                   # Schema, scan RPC, cloud seed SQL
+├── docs/                       # Guides + per-role progress logs
+├── database/                   # Schema, scan RPC, seed, Phase 2 SQL
 ├── frontend/                   # HTML pages + js/supabase.js
 ├── backend/                    # Thin HTTP receive for hardware taps
 └── hardware/tap_in_scanner/    # Arduino sketch
 ```
 
-Progress logs are per branch under `docs/progress/` so parallel work merges cleanly. Index: [`docs/PROGRESS_TRACKER.md`](docs/PROGRESS_TRACKER.md).
-
-The `supabase/` CLI folder is unused legacy — SQL lives in `database/`. **No Docker.**
-
----
-
-## Team branches & ownership
-
-| Branch | Owner | Owns |
-|--------|--------|------|
-| `branch-backend-core` | Vidhu (Lead) | `frontend/js/supabase.js`, `database/rpc_handle_scan.sql`, `backend/`, shared docs |
-| `branch-hardware` | Kathleen | `/hardware/` |
-| `branch-member-ui` | Turner | `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html` |
-| `branch-db-onboarding` | Jayati | `database/schema.sql`, `frontend/register.html` |
-| `branch-admin-analytics` | Kailash | `frontend/admin.html` |
-
-**Rule:** Stay on your branch. Never push to `main`. Only edit your assigned files (+ your own `docs/progress/<file>.md`).
+Progress index: [`docs/PROGRESS_TRACKER.md`](docs/PROGRESS_TRACKER.md).  
+The `supabase/` CLI folder is unused legacy — SQL lives in `database/`.
 
 ---
 
-## Database (MVP schema)
+## Team (who built what)
 
-- **`members`** — `id`, `full_name`, `email`, `rfid_uid`, `total_points`
-- **`events`** — `id`, `event_name`, `event_date`, `point_value`, `is_active`, `is_archived`
-- **`attendance_logs`** — `id`, `member_id`, `event_id`, `scanned_at`
-- **RPC** — `handle_rfid_scan(scanned_uid)`
+| Role | Person | Primary deliverables |
+|------|--------|----------------------|
+| Lead / backend | Vidhu | `supabase.js` Auth + helpers, scan RPC, admin shell wiring, `backend/`, docs |
+| Member UI | Turner | `index.html`, `dashboard.html`, `profile-settings.html` |
+| Schema / register | Jayati | `database/schema.sql`, `register.html` |
+| Admin / analytics | Kailash (w/ Jayati) | `admin.html` chart + exec UX (merged/polished on main) |
+| Hardware | Kathleen | `/hardware/` RC522 UID read |
 
-Details: [`database/schema.sql`](database/schema.sql), [`database/rpc_handle_scan.sql`](database/rpc_handle_scan.sql), [`docs/AI_CODING_SKILLS.md`](docs/AI_CODING_SKILLS.md).
+Feature work landed on feature branches, then merged into **`main`**.
 
 ---
 
-## Quick start (cloud Supabase)
+## Secrets (never commit these)
 
-1. Copy local secrets (gitignored):
+This is a **public** GitHub repo. Real keys stay in **gitignored** local files only:
+
+| Local file (gitignored) | Copied from | Contains |
+|-------------------------|-------------|----------|
+| `frontend/js/supabase.local.js` | `supabase.local.js.example` | Cloud Project URL + **anon** key |
+| `frontend/js/admin.local.js` | `admin.local.js.example` | Chapter admin gate password |
+| `backend/.env` | `backend/.env.example` | Same URL + anon for hardware receive |
+
+**Never** commit `service_role` keys, real anon keys, WiFi passwords, or Auth passwords.  
+Tracked examples use placeholders only (`YOUR_SUPABASE_ANON_KEY`, `change-me-before-demo`).
+
+If `git status` ever lists `supabase.local.js`, `admin.local.js`, or `backend/.env` as staged — unstage immediately.
+
+---
+
+## Quick start
+
+1. Copy local secrets and paste your cloud URL + anon key (and optional admin password):
 
 ```bash
 cp frontend/js/supabase.local.js.example frontend/js/supabase.local.js
 cp frontend/js/admin.local.js.example frontend/js/admin.local.js
+# optional for hardware receive:
+cp backend/.env.example backend/.env
 ```
 
-2. Paste your cloud Supabase Project URL + anon key into `supabase.local.js`, then run the SQL under `database/` in the Supabase SQL Editor (see [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md)).
+2. In the Supabase SQL Editor, run once (in order) — details in [`docs/LOCAL_SUPABASE.md`](docs/LOCAL_SUPABASE.md):
 
-3. Serve the frontend:
+   1. `database/schema.sql`
+   2. `database/rpc_handle_scan.sql`
+   3. `database/lead_explore_seed.sql`
+   4. `database/phase2_nullable_rfid.sql`
+
+3. For local Auth demos: Supabase → Authentication → Providers → Email → disable **Confirm email**.
+
+4. Serve the frontend:
 
 ```bash
 cd frontend
@@ -101,22 +119,41 @@ Open **http://localhost:5500/index.html**.
 
 | Flow | How |
 |------|-----|
-| Register | `register.html` |
-| Sign in | `index.html` → `dashboard.html` |
-| Admin | `admin.html` (password from `admin.local.js`) |
-| Test scan | Admin → RFID UID → `handle_rfid_scan` |
+| Create account / sign in | `index.html` → `dashboard.html` |
+| Bind RFID (once) | Dashboard → Register RFID card → `register.html` |
+| Member points / history | `dashboard.html` |
+| Profile cosmetics | `profile-settings.html` |
+| Admin | Signed-in member with RFID containing `ADMIN` → Account → Admin → chapter password |
+| Simulate tap | Admin → enter UID → Run scan RPC |
 | Hardware receive | `cd backend && python3 receive_scan.py` — see [`docs/HARDWARE_TAP_PATH.md`](docs/HARDWARE_TAP_PATH.md) |
 
-### Teammate workflow
+**Admin rule:** a member is admin when `members.rfid_uid` contains `ADMIN` (case-insensitive). Seed example: `vidhu.shrivastava@uga.edu` / `ADMIN001`. Create a Supabase Auth account for that email (sign up once), then open Admin from the profile menu.
 
-```bash
-git clone <repo-url>
-cd tap-in-RFID-tracker
-git checkout <your-branch-name>
-git branch   # confirm * is on YOUR branch
-```
+---
 
-When prompting Copilot, tag `@docs/AI_CODING_SKILLS.md`, your `@docs/progress/<file>.md`, and the file you are editing.
+## Database (MVP)
+
+- **`members`** — `id`, `full_name`, `email`, `rfid_uid` (nullable until bound), `total_points`
+- **`events`** — `id`, `event_name`, `event_date`, `point_value`, `is_active`, `is_archived`
+- **`attendance_logs`** — `id`, `member_id`, `event_id`, `scanned_at`
+- **RPC** — `handle_rfid_scan(scanned_uid)`
+
+---
+
+## Progress logs
+
+Each role keeps a readable status + work log under `docs/progress/`:
+
+| File | Who |
+|------|-----|
+| [`docs/progress/main.md`](docs/progress/main.md) | Lead — final integration / DONE |
+| [`docs/progress/backend-core.md`](docs/progress/backend-core.md) | Vidhu |
+| [`docs/progress/member-ui.md`](docs/progress/member-ui.md) | Turner |
+| [`docs/progress/db-onboarding.md`](docs/progress/db-onboarding.md) | Jayati |
+| [`docs/progress/admin-analytics.md`](docs/progress/admin-analytics.md) | Kailash / Jayati |
+| [`docs/progress/hardware.md`](docs/progress/hardware.md) | Kathleen |
+
+Index: [`docs/PROGRESS_TRACKER.md`](docs/PROGRESS_TRACKER.md).
 
 ---
 

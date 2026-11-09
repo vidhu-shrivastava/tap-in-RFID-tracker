@@ -22,9 +22,19 @@
 
 **Name:** Turner  
 **Role:** CS 1st Year — Member Frontend  
-**Branch:** `branch-member-ui`  
-**Owns:** `frontend/index.html`, `frontend/dashboard.html` (and this progress file only under docs)  
+**Branch:** `branch-member-ui` (merged into `main`)  
+**Owns:** `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html` (and this progress file only under docs)  
 **Copilot tags:** `@docs/AI_CODING_SKILLS.md` `@docs/progress/member-ui.md`
+
+---
+
+## Status — DONE
+
+Member-facing pages are complete on `main`: branded sign-in/sign-up, dashboard with points + attendance, profile settings, theme toggle, admin link only for admin members, and one-time RFID register CTA that hides after bind.
+
+Auth calls go through `frontend/js/supabase.js` helpers (wired after merge — no preview stubs).
+
+See root `README.md` for how to run the finished app.
 
 ---
 
@@ -51,6 +61,10 @@
 - **2026-10-26 19:35** — Files: `frontend/profile-settings.html`, `frontend/dashboard.html`. Built: made the account name read-only and moved the preferred name into the profile display beside the avatar. How it works: settings shows the stored account name as static text and preserves it when saving; the dashboard uses the preferred name for the profile heading and avatar initials.
 - **2026-10-26 19:39** — Files: `frontend/dashboard.html`. Built: removed the preferred-name label and value from beside the profile picture. How it works: the dashboard displays the unchangeable account name beside the avatar and uses it for initials; preferred name remains available for the welcome greeting and profile settings.
 - **2026-11-08 20:42** — Files: `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html`. Built: password-based sign-in/sign-up UI, a branded Tap-IN theme, admin-only menu link based on the member’s RFID UID, and a one-time RFID registration callout that hides after the card is bound. How it works: the member pages keep the green Tap-IN brand and reuse the same local theme toggle from the register flow, while the dashboard loads a signed-in member session and shows a demo preview fallback if the real Supabase auth flow is still pending.
+
+- **2026-11-08 23:20** — Files: `docs/progress/member-ui.md`.
+  Built: Marked Member UI log **DONE** after `member-ui` merged into `main` and Auth helpers were hooked up for real.
+  How it works: Status banner summarizes shipped pages; older bullets remain as the build history.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

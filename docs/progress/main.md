@@ -28,6 +28,22 @@
 
 ---
 
+## Status — DONE
+
+**MVP is complete on `main`.** Phase 1 (schema, scan RPC, UIs, cloud wiring) and Phase 2 (Auth, account-then-RFID, polished member/admin flows, hardware receive path) are merged and wired together.
+
+| What to know | Detail |
+|--------------|--------|
+| Entry page | `frontend/index.html` |
+| Auth | Email + password (`signUpWithPassword` / `signInWithPassword`) — no Google |
+| Admin | RFID UID contains `ADMIN` + chapter password in gitignored `admin.local.js` |
+| Secrets | Only in gitignored `supabase.local.js`, `admin.local.js`, `backend/.env` — never committed |
+| Docs | Root `README.md` is the project home; this file is the integration log |
+
+**How a demo runs:** create/sign in → dashboard → bind RFID once if needed → (admin) open Admin from profile → activate event → simulate scan or `POST /scan` → points show on dashboard.
+
+---
+
 ### 1. Automated AI Work Log (Timestamped by AI on each work session/push)
 
 <!-- AI: append new bullets below. Do not delete older entries. -->
@@ -43,6 +59,10 @@
 - **2026-11-08 22:30** — Files: `frontend/index.html`, `frontend/dashboard.html`, `frontend/profile-settings.html`, `frontend/register.html`, `docs/progress/main.md`.
   Built: Post-merge Phase 2 glue — hooked Turner’s member UI to Vidhu’s Auth helpers after `backend-core` + `member-ui` landed on `main`.
   How it works: `index.html` calls `signInWithPassword` / `signUpWithPassword` (no preview stubs); dashboard uses `getSessionMember`, `isAdminMember`, `memberHasRfid`, and `signOut`; profile settings loads the real session name; RFID bind stays on `register.html` and the dashboard CTA hides once a card is bound.
+
+- **2026-11-08 23:20** — Files: `README.md`, `docs/PROGRESS_TRACKER.md`, `docs/progress/main.md`, `docs/progress/backend-core.md`, `docs/progress/member-ui.md`, `docs/progress/db-onboarding.md`, `docs/progress/admin-analytics.md`, `docs/progress/hardware.md`, `docs/LOCAL_SUPABASE.md`, `database/README.md`.
+  Built: Marked the project **officially DONE**; rewrote README + progress index for a finished MVP; added clear Status sections on every progress file; confirmed secret files stay gitignored / placeholder-only in examples.
+  How it works: README is the public “what shipped + how to run” page; progress files keep historical AI logs but lead with a readable DONE summary so graders/teammates do not dig through weeks of bullets.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

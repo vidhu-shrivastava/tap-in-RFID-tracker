@@ -1,21 +1,34 @@
-# `/database/` — ownership (read before editing)
-
-This folder is shared across branches. **Edit only your file. Never delete someone else’s.**
-
-| File | Owner branch | Who |
-|------|----------------|-----|
-| `schema.sql` | `branch-db-onboarding` | Jayati |
-| `rpc_handle_scan.sql` | `branch-backend-core` | Vidhu |
-| `lead_explore_seed.sql` | `branch-backend-core` | Vidhu (cloud RLS + team seed) |
-| `add_is_archived.sql` | `branch-backend-core` | Vidhu (optional patch if cloud DB predates `is_archived`) |
+# `/database/` — SQL for cloud Supabase
 
 Paste these into the **cloud** Supabase SQL Editor (see `docs/LOCAL_SUPABASE.md`). Do not use Docker.
 
+**MVP status: DONE.** Run the files below once (in order) on a fresh project.
+
+| Order | File | Purpose |
+|------:|------|---------|
+| 1 | `schema.sql` | Tables: members, events, attendance_logs |
+| 2 | `rpc_handle_scan.sql` | `handle_rfid_scan(scanned_uid)` RPC |
+| 3 | `lead_explore_seed.sql` | MVP anon RLS + team directory + sample event |
+| 4 | `phase2_nullable_rfid.sql` | Allow account signup before RFID bind (`rfid_uid` nullable) |
+
+Optional / already covered by newer schema+seed:
+
+| File | Purpose |
+|------|---------|
+| `add_is_archived.sql` | Patch older clouds missing `events.is_archived` |
+
+## Historical ownership (for credit / merge history)
+
+| File | Original owner |
+|------|----------------|
+| `schema.sql` | Jayati (`branch-db-onboarding`) |
+| `rpc_handle_scan.sql` | Vidhu (`branch-backend-core`) |
+| `lead_explore_seed.sql` | Vidhu |
+| `phase2_nullable_rfid.sql` | Vidhu |
+| `add_is_archived.sql` | Vidhu |
+
 ## Rules
 
-1. **Do not delete** files you do not own (e.g. do not remove `rpc_handle_scan.sql` while working on `schema.sql`).
-2. **Do not** replace the whole folder or wipe sibling SQL files “to clean things up.”
-3. Need a change in another file? Ask that branch’s owner or the Team Lead — don’t edit it on your branch.
-4. Keeping files separate avoids merge conflicts when branches land on `main`.
-
-See also: `docs/AI_CODING_SKILLS.md`, `docs/GIT_AND_COPILOT_GUIDE.md`.
+1. Do not put real Supabase keys in any SQL file.
+2. Prefer additive SQL (safe to re-run) when patching production cloud DBs.
+3. See also: `docs/AI_CODING_SKILLS.md`, root `README.md`.

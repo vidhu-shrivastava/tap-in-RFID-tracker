@@ -22,9 +22,19 @@
 
 **Name:** Kathleen  
 **Role:** CompE Major — Hardware  
-**Branch:** `branch-hardware`  
+**Branch:** `branch-hardware` (merged into `main`)  
 **Owns:** `/hardware/` (and this progress file only under docs)  
 **Copilot tags:** `@docs/AI_CODING_SKILLS.md` `@docs/progress/hardware.md`
+
+---
+
+## Status — DONE (MVP hardware path)
+
+Arduino sketch reads RC522 card UIDs and prints them over Serial. End-to-end tap into Supabase uses the documented receive path: scanner → `backend/receive_scan.py` `POST /scan` → `handle_rfid_scan` (same RPC as Admin “simulate scan”). See `docs/HARDWARE_TAP_PATH.md`.
+
+OLED / buzzer polish can continue later; the MVP attendance path is complete without putting secrets in firmware.
+
+See root `README.md`.
 
 ---
 
@@ -37,6 +47,10 @@
   Built: RC522 card detection and UID hex output over Serial. How it works: initializes SPI and MFRC522 in `setup()`, polls and prints UID bytes in `loop()`, then halts the PICC and stops crypto.
 - **2026-10-19 21:30** — Files: `hardware/tap_in_scanner/tap_in_scanner.ino`, `WEEK_1_PLAN.md`, `docs/progress/hardware.md`.
   Built: clarified variable UID lengths and improved the Week 1 setup, implementation, and physical verification checklists. How it works: the sketch prints the reader-reported UID bytes, while the plan separates implemented code checks from library, compile, wiring, upload, and repeat-tap tests that require completion.
+
+- **2026-11-08 23:20** — Files: `docs/progress/hardware.md`.
+  Built: Marked Hardware log **DONE** for MVP (Serial UID + documented WiFi/`POST /scan` path).
+  How it works: Status banner separates shipped MVP from optional OLED/buzzer follow-ups.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

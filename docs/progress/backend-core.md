@@ -22,9 +22,24 @@
 
 **Name:** Vidhu  
 **Role:** CS 2nd Year — Backend Integrator & Team Lead  
-**Branch:** `branch-backend-core`  
+**Branch:** `branch-backend-core` (merged into `main`)  
 **Owns:** `frontend/js/supabase.js`, shared docs guides (not other `docs/progress/*` files), backend logic  
 **Copilot tags:** `@docs/AI_CODING_SKILLS.md` `@docs/progress/backend-core.md`
+
+---
+
+## Status — DONE
+
+Shared Supabase client, scan RPC, Phase 2 Auth helpers, admin shell wiring, and `backend/receive_scan.py` are complete and live on `main`.
+
+| Piece | Result |
+|-------|--------|
+| Auth helpers | `signUpWithPassword`, `signInWithPassword`, `signOut`, `getSessionMember` |
+| RFID / admin helpers | `registerRfidForCurrentMember`, `memberHasRfid`, `isAdminMember` |
+| Scan path | `handle_rfid_scan` RPC + admin simulate + `POST /scan` receive |
+| Secrets | Anon keys / admin password only in gitignored local files |
+
+See root `README.md` and `docs/progress/main.md` for the final project summary.
 
 ---
 
@@ -74,6 +89,10 @@
 - **2026-11-08 18:10** — Files: `frontend/js/supabase.js`, `frontend/register.html`, `frontend/admin.html`, `docs/progress/backend-core.md`.
   Built: Extra beginner/demo comments on Auth + RFID bind helpers and the register/admin page scripts (step numbers, Turner import notes, gate/chart explainers).
   How it works: comments spell out the Auth↔members email link, signup/bind panel switching, and admin unlock checks so the code is easier to demo out loud.
+
+- **2026-11-08 23:20** — Files: `docs/progress/backend-core.md`.
+  Built: Marked this branch log **DONE** with a top Status summary after merge into `main`.
+  How it works: historical AI bullets stay; Status section is the quick read for “what backend shipped.”
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

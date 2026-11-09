@@ -20,11 +20,19 @@
 
 # Progress — Database & Onboarding
 
-**Name:** Jayati
+**Name:** Jayati  
 **Role:** MIS — Database Schema & Card Registration  
-**Branch:** `branch-db-onboarding`  
+**Branch:** `branch-db-onboarding` (merged into `main`)  
 **Owns:** `/database/schema.sql`, `frontend/register.html` (and this progress file only under docs)  
 **Copilot tags:** `@docs/AI_CODING_SKILLS.md` `@docs/progress/db-onboarding.md`
+
+---
+
+## Status — DONE
+
+Core schema (`members` / `events` / `attendance_logs`) and the branded `register.html` onboarding page shipped and merged. On `main`, register is account-first (Auth signup) with optional RFID bind via shared helpers; `rfid_uid` can be null until a card is bound (`database/phase2_nullable_rfid.sql`).
+
+See root `README.md` for the full finished stack.
 
 ---
 
@@ -40,6 +48,10 @@
 - **2026-10-28 19:05** — Files: `frontend/register.html`.
 	Built: Restyled the card registration page to match Tap-IN member UI (green/mint/teal light gradient, slate dark theme, logo mark, emerald cards/inputs, gradient submit button, theme toggle, visible field errors).
 	How it works: Same Week-1 static form (full name, email, RFID hex + `preventDefault`); only Tailwind/classes and light validation messaging changed — no schema or Supabase writes.
+
+- **2026-11-08 23:20** — Files: `docs/progress/db-onboarding.md`.
+  Built: Marked Database & Onboarding log **DONE** after merge into finished `main`.
+  How it works: Status banner points readers at schema + register outcomes without rewriting older bullets.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

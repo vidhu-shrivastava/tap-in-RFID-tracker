@@ -1,5 +1,7 @@
 # Supabase setup (cloud only)
 
+**Project status:** MVP is **DONE** on `main`. This page is the one-time cloud setup checklist for running the finished app.
+
 **Use a free cloud Supabase project.** Do not run Docker / `npx supabase start` for this app — it causes more friction than it is worth, and the HTML frontend does not need a local database.
 
 The `supabase/` CLI folder in the repo is legacy. Ignore it. Source of truth for SQL is **`database/*.sql`** pasted into the cloud SQL Editor.
@@ -37,7 +39,7 @@ Paste and run, in order:
 
 If you already applied an older `schema.sql` without `is_archived`, the seed file adds that column safely.
 
-**Auth (Phase 2):** For local demos, in Supabase → Authentication → Providers → Email, disable **Confirm email** so `signUpWithPassword` returns a session immediately. Keep RLS open (seed policies) until Kathleen’s hardware tap path works.
+**Auth:** For local demos, in Supabase → Authentication → Providers → Email, disable **Confirm email** so signup returns a session immediately. Seed RLS stays open for the MVP hardware receive path.
 
 ## 4. Serve the frontend
 
@@ -50,9 +52,9 @@ Open **http://localhost:5500/index.html**
 
 | Page | Purpose |
 |------|---------|
-| `index.html` | Member sign-in (Turner wires password Auth helpers) |
-| `register.html` | Create Auth account first; optional RFID bind |
-| `dashboard.html` | Live points + attendance |
+| `index.html` | Member sign-in / create account (email + password Auth) |
+| `register.html` | Account-first signup + optional RFID bind |
+| `dashboard.html` | Live points + attendance; RFID CTA until card is bound |
 | `admin.html` | Chapter admin — events, vertical chart, simulate scan |
 
 Hardware tap path (Arduino → scan RPC / `backend/` receive): see [`docs/HARDWARE_TAP_PATH.md`](HARDWARE_TAP_PATH.md).

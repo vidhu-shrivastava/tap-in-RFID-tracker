@@ -20,11 +20,21 @@
 
 # Progress — Admin & Analytics
 
-**Name:** Jayati/Kailash  
+**Name:** Jayati / Kailash  
 **Role:** MIS — Exec Admin Dashboard & Analytics  
-**Branch:** `branch-admin-analytics`  
+**Branch:** `branch-admin-analytics` (merged / polished on `main`)  
 **Owns:** `frontend/admin.html` (and this progress file only under docs)  
 **Copilot tags:** `@docs/AI_CODING_SKILLS.md` `@docs/progress/admin-analytics.md`
+
+---
+
+## Status — DONE
+
+Chapter admin shell is complete on `main`: signed-in admin gate (RFID contains `ADMIN` + local chapter password), event create/activate/deactivate/archive, members directory, recent attendance, simulate scan RPC, and vertical Chart.js attendance chart (check-ins vs org size). Exit returns to the member dashboard.
+
+Early branch AI bullets may be sparse — most admin polish landed via backend-core / main integration. The page itself ships as part of the finished MVP.
+
+See root `README.md` and `docs/progress/main.md`.
 
 ---
 
@@ -33,6 +43,10 @@
 <!-- AI: append new bullets below. Do not delete older entries. -->
 
 - *(No AI entries yet — first work session will add the first timestamped bullet here.)*
+
+- **2026-11-08 23:20** — Files: `docs/progress/admin-analytics.md`.
+  Built: Marked Admin & Analytics log **DONE** with a Status summary pointing at the finished `admin.html` on `main`.
+  How it works: clarifies that admin UX was completed through merge/polish even when this branch’s early AI log stayed thin.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 
