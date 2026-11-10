@@ -27,15 +27,17 @@
  *   - Auth signup creates auth.users, then inserts a members row if missing
  *   - Seeded members (same email) are reused — we do NOT invent a second row
  *   - members.id stays the table PK (may differ from auth.users.id on seeds)
- *   - RFID is optional at signup; bind later with registerRfidForCurrentMember
+ *   - OneCard / RFID is optional at signup; bind later with registerRfidForCurrentMember
  *
  * LEGACY (email-only sessionStorage) — keep for Turner's migration week:
  *   getMemberByEmail + saveMemberSession / getMemberSession / clearMemberSession
  * Prefer Auth helpers for new UI. Do not add Google providers.
  *
  * ADMIN RULE (single source of truth for Turner’s profile menu):
- *   isAdminMember(member) → true when member.rfid_uid contains "ADMIN"
- *   (case-insensitive). Example seed: Vidhu / ADMIN001.
+ *   isAdminMember(member) → members.is_admin === true
+ *   Legacy fallback: rfid_uid contains "ADMIN" (old demo cards like ADMIN001).
+ *   Real UGA OneCard UIDs are hex (e.g. 04A1B2C3D4E5F6) and cannot encode ADMIN —
+ *   run database/phase3_onecard_admin.sql and set is_admin in the DB.
  *   Optional extra gate on admin.html still uses gitignored admin.local.js.
  *
  * RLS: keep open (anon/authenticated) until Kathleen’s hardware → backend/
@@ -57,6 +59,10 @@ if (
 
 /** Shared browser client — import this from any page instead of re-init. */
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/** Columns every member fetch should request (includes OneCard-era is_admin). */
+const MEMBER_COLUMNS =
+  "id, full_name, email, rfid_uid, total_points, is_admin";
 
 /** sessionStorage key for the signed-in member (tab-scoped MVP cache). */
 const MEMBER_SESSION_KEY = "tapInMemberSession";
@@ -85,7 +91,7 @@ export async function handleRfidScan(scannedUid) {
 
 /**
  * Save a minimal member session after register / sign-in.
- * @param {{ id: string, email: string, full_name?: string, rfid_uid?: string|null, total_points?: number }} member
+ * @param {{ id: string, email: string, full_name?: string, rfid_uid?: string|null, total_points?: number, is_admin?: boolean }} member
  */
 export function saveMemberSession(member) {
   if (!member || !member.id) {
@@ -99,11 +105,12 @@ export function saveMemberSession(member) {
       full_name: member.full_name || "",
       rfid_uid: member.rfid_uid ?? null,
       total_points: Number(member.total_points ?? 0),
+      is_admin: Boolean(member.is_admin),
     })
   );
 }
 
-/** @returns {{ id: string, email: string, full_name: string, rfid_uid: string|null, total_points: number }|null} */
+/** @returns {{ id: string, email: string, full_name: string, rfid_uid: string|null, total_points: number, is_admin: boolean }|null} */
 export function getMemberSession() {
   try {
     const raw = sessionStorage.getItem(MEMBER_SESSION_KEY);
@@ -116,6 +123,7 @@ export function getMemberSession() {
       full_name: parsed.full_name || "",
       rfid_uid: parsed.rfid_uid ?? null,
       total_points: Number(parsed.total_points ?? 0),
+      is_admin: Boolean(parsed.is_admin),
     };
   } catch (error) {
     console.error("[tap-in] could not read member session:", error);
@@ -129,13 +137,13 @@ export function clearMemberSession() {
 }
 
 // ---------------------------------------------------------------------------
-// Admin / RFID product helpers (Turner imports these)
+// Admin / OneCard product helpers (Turner imports these)
 // ---------------------------------------------------------------------------
-// Demo one-liner: "Admin = card UID contains ADMIN. Already have a card? memberHasRfid."
+// Demo one-liner: "Admin = members.is_admin. Already have a OneCard? memberHasRfid."
 
 /**
- * True when an RFID UID is admin-priority (substring "ADMIN", case-insensitive).
- * Example seed: Vidhu's card ADMIN001 → admin. Regular hex like A1B2C3D4 → member.
+ * Legacy helper: true when a UID string contains "ADMIN" (old demo cards).
+ * Prefer isAdminMember() — real OneCard hex UIDs never contain ADMIN.
  * @param {string|null|undefined} rfidUid
  * @returns {boolean}
  */
@@ -147,16 +155,18 @@ export function isAdminRfid(rfidUid) {
 
 /**
  * Admin access rule for profile menus / gates.
- * Turner: only show the Admin menu item when isAdminMember(member) is true.
- * @param {{ rfid_uid?: string|null }|null|undefined} member
+ * True when members.is_admin is set, or legacy UID still contains "ADMIN".
+ * @param {{ rfid_uid?: string|null, is_admin?: boolean }|null|undefined} member
  * @returns {boolean}
  */
 export function isAdminMember(member) {
-  return isAdminRfid(member?.rfid_uid);
+  if (!member) return false;
+  if (member.is_admin === true) return true;
+  return isAdminRfid(member.rfid_uid);
 }
 
 /**
- * True when the member already has a bound RFID card.
+ * True when the member already has a bound OneCard / RFID UID.
  * Turner: hide “Register card” on the dashboard when this returns true.
  * @param {{ rfid_uid?: string|null }|null|undefined} member
  * @returns {boolean}
@@ -167,19 +177,53 @@ export function memberHasRfid(member) {
 }
 
 /**
- * Clean up a typed UID: trim spaces, uppercase, require hex only (0-9 A-F).
+ * Privacy mask for displaying OneCard IDs in the UI.
+ * Full UID stays in the DB and is still used for taps / bind — only the
+ * rendered string is redacted (e.g. 04A1B2C3D4E5F6 → **********E5F6).
+ * Legacy ADMIN* UIDs are shown in full (not masked).
+ * @param {string|null|undefined} uid
+ * @returns {string}
+ */
+export function maskOneCardUid(uid) {
+  const s = String(uid || "")
+    .trim()
+    .toUpperCase();
+  if (!s) return "";
+  // Chapter admin demo cards stay visible.
+  if (s.includes("ADMIN")) return s;
+  if (s.length <= 4) return s;
+  // OneCards: hide everything except the last 4 characters.
+  return "*".repeat(s.length - 4) + s.slice(-4);
+}
+
+/**
+ * Clean up a typed/scanned UID for OneCards + blank RFID tags.
+ * Strips spaces/colons/dashes, uppercases, requires hex of length 8 / 14 / 20
+ * (4-byte, 7-byte OneCard, or 10-byte UIDs from the RC522).
  * @param {string} rawUid
  * @returns {{ uid: string|null, error: Error|null }}
  */
 function normalizeRfidUid(rawUid) {
-  const uid = String(rawUid || "").trim().toUpperCase();
+  const uid = String(rawUid || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[\s:.\-]/g, "");
   if (!uid) {
-    return { uid: null, error: new Error("RFID UID is required.") };
+    return { uid: null, error: new Error("OneCard UID is required.") };
   }
   if (!/^[A-F0-9]+$/.test(uid)) {
     return {
       uid: null,
-      error: new Error("RFID UID must be hexadecimal (0-9 and A-F)."),
+      error: new Error("OneCard UID must be hexadecimal (0-9 and A-F)."),
+    };
+  }
+  // Captured UGA OneCards are 7-byte (14 hex). Also allow 4-byte / 10-byte tags.
+  if (![8, 14, 20].includes(uid.length)) {
+    return {
+      uid: null,
+      error: new Error(
+        "OneCard UID should be 8, 14, or 20 hex characters (example: 04A1B2C3D4E5F6)."
+      ),
     };
   }
   return { uid, error: null };
@@ -218,7 +262,7 @@ async function ensureMemberRowForEmail(fields) {
         .from("members")
         .update({ full_name })
         .eq("id", existing.data.id)
-        .select("id, full_name, email, rfid_uid, total_points")
+        .select(MEMBER_COLUMNS)
         .single();
       if (error) {
         console.error("[tap-in] ensureMemberRow name update failed:", error.message);
@@ -241,7 +285,7 @@ async function ensureMemberRowForEmail(fields) {
   const { data, error } = await supabase
     .from("members")
     .insert({ full_name, email, rfid_uid: null, total_points: 0 })
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .single();
 
   if (error) {
@@ -474,7 +518,7 @@ export async function registerRfidForCurrentMember(rawUid) {
     .from("members")
     .update({ rfid_uid: uid })
     .eq("id", member.id)
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .single();
 
   if (error) {
@@ -527,7 +571,7 @@ export async function getMemberByEmail(email) {
 
   const { data, error } = await supabase
     .from("members")
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .ilike("email", normalized)
     .maybeSingle();
 
@@ -546,7 +590,7 @@ export async function getMemberByEmail(email) {
 export async function getMemberById(memberId) {
   const { data, error } = await supabase
     .from("members")
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .eq("id", memberId)
     .maybeSingle();
 
@@ -578,7 +622,7 @@ export async function registerMember(fields) {
   const { data, error } = await supabase
     .from("members")
     .insert({ full_name, email, rfid_uid, total_points: 0 })
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .single();
 
   if (error) {
@@ -595,7 +639,7 @@ export async function registerMember(fields) {
 export async function listMembers() {
   const { data, error } = await supabase
     .from("members")
-    .select("id, full_name, email, rfid_uid, total_points")
+    .select(MEMBER_COLUMNS)
     .order("full_name", { ascending: true });
 
   if (error) {
@@ -605,8 +649,8 @@ export async function listMembers() {
 
   const rows = data || [];
   rows.sort((a, b) => {
-    const aAdmin = isAdminRfid(a.rfid_uid) ? 0 : 1;
-    const bAdmin = isAdminRfid(b.rfid_uid) ? 0 : 1;
+    const aAdmin = isAdminMember(a) ? 0 : 1;
+    const bAdmin = isAdminMember(b) ? 0 : 1;
     if (aAdmin !== bAdmin) return aAdmin - bAdmin;
     return String(a.full_name || "").localeCompare(String(b.full_name || ""));
   });

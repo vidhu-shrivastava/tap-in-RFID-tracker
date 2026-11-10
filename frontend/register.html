@@ -109,7 +109,7 @@
             Create your account
           </h1>
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Make an account first. You can bind an RFID card later from your
+            Make an account first. You can bind your UGA OneCard later from your
             dashboard after you sign in.
           </p>
         </div>
@@ -221,11 +221,12 @@
             id="bind-heading"
             class="mt-2 text-2xl font-bold tracking-tight sm:text-3xl"
           >
-            Bind your RFID card
+            Bind your UGA OneCard
           </h1>
           <p id="bind-intro" class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Enter the hexadecimal UID from your card reader. You only do this
-            once per account.
+            Enter the UID from the Arduino Serial Monitor after you tap your
+            OneCard (example: <span class="font-mono">04A1B2C3D4E5F6</span>).
+            You only do this once per account.
           </p>
         </div>
 
@@ -235,7 +236,7 @@
               class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
               for="rfid_uid"
             >
-              RFID hex string
+              OneCard UID (hex)
             </label>
             <input
               id="rfid_uid"
@@ -243,11 +244,11 @@
               type="text"
               autocapitalize="characters"
               spellcheck="false"
-              pattern="[A-Fa-f0-9]+"
-              title="Enter the card UID using hexadecimal characters (0-9 and A-F)."
+              pattern="[A-Fa-f0-9\s:.\-]+"
+              title="Enter the OneCard UID using hexadecimal characters (0-9 and A-F)."
               required
               class="block w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 font-mono text-sm uppercase text-slate-900 outline-none placeholder:normal-case placeholder:text-slate-400 focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20 dark:border-emerald-800 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400 dark:focus:ring-emerald-400/30"
-              placeholder="A1B2C3D4"
+              placeholder="04A1B2C3D4E5F6"
             />
             <p
               id="rfid_uid-error"
@@ -306,6 +307,7 @@
         signUpWithPassword,
         getSessionMember,
         memberHasRfid,
+        maskOneCardUid,
         registerRfidForCurrentMember,
       } from "./js/supabase.js";
 
@@ -366,7 +368,7 @@
       const { data: member } = await getSessionMember();
       if (member && memberHasRfid(member)) {
         document.querySelector("#done-copy").textContent =
-          `You're signed in as ${member.full_name || member.email}. RFID ${member.rfid_uid} is already linked.`;
+          `You're signed in as ${member.full_name || member.email}. OneCard ${maskOneCardUid(member.rfid_uid)} is already linked.`;
         showOnly(donePanel);
       } else if (member) {
         document.querySelector("#bind-intro").textContent =
@@ -461,7 +463,7 @@
           if (!input.checkValidity() || value === "") {
             showFieldError(
               "rfid_uid",
-              "Enter a hexadecimal RFID UID (0-9 and A-F only)."
+              "Enter a OneCard UID (hex, usually 14 characters like 04A1B2C3D4E5F6)."
             );
             status.textContent = "Please fix the highlighted fields and try again.";
             status.className =
@@ -471,7 +473,7 @@
 
           status.className =
             "mt-5 min-h-6 text-sm text-slate-700 dark:text-slate-300";
-          status.textContent = "Binding RFID card…";
+          status.textContent = "Binding OneCard…";
           button.disabled = true;
 
           const { data, error } = await registerRfidForCurrentMember(value);
@@ -484,7 +486,7 @@
             return;
           }
 
-          status.textContent = `Bound ${data.rfid_uid}. Opening dashboard…`;
+          status.textContent = `Bound ${maskOneCardUid(data.rfid_uid)}. Opening dashboard…`;
           status.className =
             "mt-5 min-h-6 text-sm text-emerald-800 dark:text-emerald-300";
           window.location.href = "dashboard.html";

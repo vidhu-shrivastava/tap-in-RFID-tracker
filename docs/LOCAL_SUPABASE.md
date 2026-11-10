@@ -35,7 +35,8 @@ Paste and run, in order:
 1. [`database/schema.sql`](../database/schema.sql) — tables
 2. [`database/rpc_handle_scan.sql`](../database/rpc_handle_scan.sql) — scan function
 3. [`database/lead_explore_seed.sql`](../database/lead_explore_seed.sql) — MVP anon RLS grants + team directory + sample event
-4. [`database/phase2_nullable_rfid.sql`](../database/phase2_nullable_rfid.sql) — allow account signup before RFID bind
+4. [`database/phase2_nullable_rfid.sql`](../database/phase2_nullable_rfid.sql) — allow account signup before OneCard bind
+5. [`database/phase3_onecard_admin.sql`](../database/phase3_onecard_admin.sql) — `members.is_admin` for real OneCard hex UIDs
 
 If you already applied an older `schema.sql` without `is_archived`, the seed file adds that column safely.
 

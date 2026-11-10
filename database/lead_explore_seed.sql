@@ -9,6 +9,10 @@
 ALTER TABLE events
   ADD COLUMN IF NOT EXISTS is_archived boolean NOT NULL DEFAULT false;
 
+-- OneCard admin flag (no-op if phase3_onecard_admin.sql / schema already added it)
+ALTER TABLE members
+  ADD COLUMN IF NOT EXISTS is_admin boolean NOT NULL DEFAULT false;
+
 -- Allow the browser anon key to read/write for MVP smoke tests.
 -- (Open on purpose for a student-org prototype — tighten with Auth/RLS later.)
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
@@ -43,17 +47,20 @@ BEGIN
   END IF;
 END $$;
 
--- Team directory (uga.edu). UIDs containing "ADMIN" are admin-priority.
-INSERT INTO members (full_name, email, rfid_uid, total_points)
+-- Team directory (uga.edu) — real UGA OneCard chip UIDs (14 hex).
+-- Vidhu keeps ADMIN001 for the chapter admin account (is_admin = true).
+-- Personal OneCard 04BE98AA1B1990 lives on vrs97350@uga.edu (see phase3_onecard_member_uids.sql).
+INSERT INTO members (full_name, email, rfid_uid, total_points, is_admin)
 VALUES
-  ('Vidhu Shrivastava', 'vidhu.shrivastava@uga.edu', 'ADMIN001', 0),
-  ('Turner Crawford', 'turner.crawford@uga.edu', 'A1B2C3D4', 0),
-  ('Kathleen Go', 'kathleen.go@uga.edu', 'B2C3D4E5', 0),
-  ('Jayati Joshi', 'jayati.joshi@uga.edu', 'C3D4E5F6', 0),
-  ('Kailash Konisetty', 'kailash.konisetty@uga.edu', 'D4E5F6A7', 0)
+  ('Vidhu Shrivastava', 'vidhu.shrivastava@uga.edu', 'ADMIN001', 0, true),
+  ('Turner Crawford', 'turner.crawford@uga.edu', '04537B22F01990', 0, false),
+  ('Kathleen Go', 'kathleen.go@uga.edu', '04692602CD1590', 0, false),
+  ('Jayati Joshi', 'jayati.joshi@uga.edu', '0465D652FD1890', 0, false),
+  ('Kailash Konisetty', 'kailash.konisetty@uga.edu', '043C8CA2A31990', 0, false)
 ON CONFLICT (email) DO UPDATE
 SET full_name = EXCLUDED.full_name,
-    rfid_uid = EXCLUDED.rfid_uid;
+    rfid_uid = EXCLUDED.rfid_uid,
+    is_admin = EXCLUDED.is_admin;
 
 -- Sample events; keep exactly one active for scan RPC
 INSERT INTO events (event_name, event_date, point_value, is_active, is_archived)

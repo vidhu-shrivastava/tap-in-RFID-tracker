@@ -9,7 +9,9 @@ Paste these into the **cloud** Supabase SQL Editor (see `docs/LOCAL_SUPABASE.md`
 | 1 | `schema.sql` | Tables: members, events, attendance_logs |
 | 2 | `rpc_handle_scan.sql` | `handle_rfid_scan(scanned_uid)` RPC |
 | 3 | `lead_explore_seed.sql` | MVP anon RLS + team directory + sample event |
-| 4 | `phase2_nullable_rfid.sql` | Allow account signup before RFID bind (`rfid_uid` nullable) |
+| 4 | `phase2_nullable_rfid.sql` | Allow account signup before OneCard bind (`rfid_uid` nullable) |
+| 5 | `phase3_onecard_admin.sql` | Add `members.is_admin` so real OneCard hex UIDs can be used by admins |
+| 6 | `phase3_onecard_member_uids.sql` | Set Kathleen / Jayati / Turner / Kailash OneCard UIDs (keeps Vidhu `ADMIN001`) |
 
 Optional / already covered by newer schema+seed:
 

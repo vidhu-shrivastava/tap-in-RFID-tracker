@@ -259,7 +259,7 @@
           </div>
         </section>
 
-        <!-- Vertical attendance chart: solid = check-ins, hollow = org RFID size -->
+        <!-- Vertical attendance chart: solid = check-ins filling outline = org OneCard count -->
         <section
           aria-labelledby="chart-heading"
           class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
@@ -268,8 +268,8 @@
             Check-ins per event
           </h2>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Solid bars = attendance. Outline bars = total registered RFID cards
-            (org size). Dates on the X-axis.
+            Outline = registered OneCards (org size). Solid fill = attendance
+            for that event. X-axis shows the event date only.
           </p>
 
           <div class="mt-4 max-w-sm">
@@ -286,7 +286,7 @@
               id="event-detail-status"
               class="mt-2 text-sm text-slate-600 dark:text-slate-400"
             >
-              Pick an event to see attended / total cards.
+              Pick an event to see attended / registered OneCards.
             </p>
           </div>
 
@@ -310,12 +310,11 @@
           class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="scan-heading" class="text-xl font-semibold">
-            Test RFID scan
+            Test OneCard scan
           </h2>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Calls
-            <code class="rounded bg-emerald-50 px-1 dark:bg-emerald-950/50">handle_rfid_scan</code>
-            with a UID (same path hardware will use later).
+            Simulates a OneCard tap through the same check-in path the Arduino
+            uses (active event → attendance + points).
           </p>
           <form
             id="scan-form"
@@ -323,14 +322,16 @@
           >
             <div class="flex-1">
               <label for="scan_uid" class="block text-sm font-semibold"
-                >RFID UID</label
+                >OneCard UID</label
               >
               <input
                 id="scan_uid"
                 required
                 pattern="[A-Za-z0-9]+"
+                autocomplete="off"
+                spellcheck="false"
                 class="mt-1 w-full rounded-lg border border-emerald-200 px-3 py-2 font-mono uppercase dark:border-emerald-800 dark:bg-slate-800"
-                placeholder="ADMIN001 or A1B2C3D4"
+                placeholder="04A1B2C3D4E5F6"
               />
             </div>
             <button
@@ -355,9 +356,9 @@ Results show here after a scan.</pre
         >
           <h2 id="members-heading" class="text-xl font-semibold">Members</h2>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            UIDs containing
-            <code class="rounded bg-emerald-50 px-1 dark:bg-emerald-950/50">ADMIN</code>
-            count as chapter admin. Members without a card show as unbound.
+            Chapter admin is
+            <code class="rounded bg-emerald-50 px-1 dark:bg-emerald-950/50">members.is_admin</code>
+            (OneCard hex UIDs cannot encode ADMIN).
           </p>
           <div class="mt-4 overflow-x-auto">
             <table class="w-full min-w-[36rem] text-left text-sm">
@@ -367,7 +368,7 @@ Results show here after a scan.</pre
                 <tr>
                   <th class="px-3 py-2">Name</th>
                   <th class="px-3 py-2">Email</th>
-                  <th class="px-3 py-2">RFID</th>
+                  <th class="px-3 py-2">OneCard ID</th>
                   <th class="px-3 py-2">Priority</th>
                   <th class="px-3 py-2 text-right">Points</th>
                 </tr>
@@ -422,6 +423,7 @@ Results show here after a scan.</pre
         isAdminRfid,
         isAdminMember,
         memberHasRfid,
+        maskOneCardUid,
         listEventCheckInCounts,
         listRecentAttendance,
         handleRfidScan,
@@ -488,7 +490,7 @@ Results show here after a scan.</pre
           "Sign in on the member app first, then open Admin from your profile menu.";
       } else if (!isAdminMember(gateMember)) {
         gateHint.textContent =
-          "This page is for chapter admins (RFID UID contains ADMIN). Head back to your dashboard.";
+          "This page is for chapter admins (members.is_admin). Head back to your dashboard.";
       } else {
         gateHint.textContent = `Signed in as ${gateMember.full_name || gateMember.email}. Enter the chapter password to continue.`;
       }
@@ -535,22 +537,16 @@ Results show here after a scan.</pre
           .replaceAll('"', "&quot;");
       }
 
-      function formatEventStamp(eventDate, eventName) {
-        if (!eventDate) return eventName || "Event";
-        // event_date is a calendar date — show a clear stamp on the X-axis.
+      function formatEventDateOnly(eventDate) {
+        if (!eventDate) return "—";
+        // Calendar date only on the X-axis (event name stays in tooltips).
         const parsed = new Date(`${eventDate}T12:00:00`);
-        const stamp = Number.isNaN(parsed.getTime())
-          ? eventDate
-          : parsed.toLocaleString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-        const shortName =
-          String(eventName || "").length > 18
-            ? `${String(eventName).slice(0, 16)}…`
-            : eventName || "Event";
-        return `${stamp}\n${shortName}`;
+        if (Number.isNaN(parsed.getTime())) return eventDate;
+        return parsed.toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
       }
 
       function eventStatusHtml(ev) {
@@ -606,7 +602,7 @@ Results show here after a scan.</pre
             "Pick an event to see attended / total cards.";
           return;
         }
-        eventDetailStatus.textContent = `${row.event_name}: ${row.check_ins} attended / ${row.total_cards} total cards`;
+        eventDetailStatus.textContent = `${row.event_name}: ${row.check_ins} attended / ${row.total_cards} OneCards`;
       }
 
       eventDetail.addEventListener("change", () => {
@@ -620,7 +616,7 @@ Results show here after a scan.</pre
         const emptyEl = document.getElementById("chart-empty");
         const canvas = document.getElementById("attendance-chart");
         const labels = latestChartRows.map((row) =>
-          formatEventStamp(row.event_date, row.event_name)
+          formatEventDateOnly(row.event_date)
         );
         const checkIns = latestChartRows.map((row) => row.check_ins);
         const totals = latestChartRows.map((row) => row.total_cards);
@@ -640,45 +636,50 @@ Results show here after a scan.</pre
 
         if (attendanceChart) {
           attendanceChart.data.labels = labels;
-          attendanceChart.data.datasets[0].data = checkIns;
-          attendanceChart.data.datasets[1].data = totals;
+          // Dataset 0 = outline (org size), dataset 1 = solid attendance fill
+          attendanceChart.data.datasets[0].data = totals;
+          attendanceChart.data.datasets[1].data = checkIns;
           attendanceChart.update();
           return;
         }
 
-        // Vertical bars:
-        //   solid fill  = how many people checked in
-        //   hollow outline = how many RFID cards the org has registered
+        // Overlapping bars: outline = registered OneCards, solid fills as attendance grows.
         attendanceChart = new Chart(canvas, {
           type: "bar",
           data: {
             labels,
             datasets: [
               {
-                label: "Attendance",
-                data: checkIns,
-                backgroundColor: "rgba(4, 120, 87, 0.75)",
-                borderColor: "rgb(4, 120, 87)",
-                borderWidth: 1,
-                borderRadius: 4,
-                maxBarThickness: 36,
-                order: 1,
-              },
-              {
-                label: "Registered cards (org size)",
+                label: "Registered OneCards (org size)",
                 data: totals,
                 backgroundColor: "rgba(0, 0, 0, 0)",
                 borderColor: "rgb(15, 118, 110)",
                 borderWidth: 2,
                 borderRadius: 4,
-                maxBarThickness: 36,
+                maxBarThickness: 40,
                 order: 2,
+              },
+              {
+                label: "Attendance",
+                data: checkIns,
+                backgroundColor: "rgba(4, 120, 87, 0.8)",
+                borderColor: "rgb(4, 120, 87)",
+                borderWidth: 1,
+                borderRadius: 4,
+                maxBarThickness: 40,
+                order: 1,
               },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            datasets: {
+              bar: {
+                // Overlap instead of side-by-side groups.
+                grouped: false,
+              },
+            },
             plugins: {
               legend: {
                 display: true,
@@ -697,9 +698,9 @@ Results show here after a scan.</pre
                   label: (ctx) => {
                     const n = ctx.parsed.y;
                     if (ctx.datasetIndex === 0) {
-                      return `${n} check-in${n === 1 ? "" : "s"}`;
+                      return `${n} registered OneCard${n === 1 ? "" : "s"}`;
                     }
-                    return `${n} registered card${n === 1 ? "" : "s"}`;
+                    return `${n} check-in${n === 1 ? "" : "s"}`;
                   },
                 },
               },
@@ -829,14 +830,16 @@ Results show here after a scan.</pre
         }
         body.innerHTML = data
           .map((m) => {
-            const admin = isAdminRfid(m.rfid_uid);
+            const admin = isAdminMember(m);
             const bound = memberHasRfid(m);
             return `
           <tr>
             <td class="px-3 py-2 font-medium">${escapeHtml(m.full_name)}</td>
             <td class="px-3 py-2">${escapeHtml(m.email)}</td>
             <td class="px-3 py-2 font-mono text-xs">${
-              bound ? escapeHtml(m.rfid_uid) : '<span class="text-slate-400">— unbound</span>'
+              bound
+                ? escapeHtml(maskOneCardUid(m.rfid_uid))
+                : '<span class="text-slate-400">— unbound</span>'
             }</td>
             <td class="px-3 py-2">${
               admin
@@ -880,14 +883,15 @@ Results show here after a scan.</pre
       }
 
       async function refreshAll() {
-        adminStatus.textContent = "Loading admin data…";
+        adminStatus.textContent = "";
         await Promise.all([
           refreshEvents(),
           refreshMembers(),
           refreshLogs(),
           refreshChart(),
         ]);
-        adminStatus.textContent = "Admin data loaded.";
+        // Keep the status line empty on success — only show create/activate errors.
+        adminStatus.textContent = "";
         adminStatus.className = "text-sm text-slate-600 dark:text-slate-400";
       }
 

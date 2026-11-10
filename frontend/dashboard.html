@@ -125,20 +125,20 @@
         </p>
 
         <div id="rfid-status-card" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100">
-          Checking RFID setup…
+          Checking OneCard setup…
         </div>
       </section>
 
-      <section id="rfid-register-row" aria-label="RFID registration" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <section id="rfid-register-row" aria-label="OneCard registration" class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="text-lg font-semibold">RFID card</h2>
+            <h2 class="text-lg font-semibold">UGA OneCard</h2>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Bind your card once so tap-ins can log your attendance.
+              Bind your OneCard once so event tap-ins can log your attendance.
             </p>
           </div>
           <a id="rfid-register-link" href="register.html" class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
-            Register RFID card
+            Register OneCard
           </a>
         </div>
       </section>
@@ -179,6 +179,7 @@
         getMemberAttendance,
         isAdminMember,
         memberHasRfid,
+        maskOneCardUid,
         signOut,
       } from "./js/supabase.js";
 
@@ -276,7 +277,7 @@
 
       function renderRfidState(member) {
         if (memberHasRfid(member)) {
-          rfidStatusCard.textContent = `RFID card registered (${member.rfid_uid}) — you are ready to check in.`;
+          rfidStatusCard.textContent = `OneCard registered (${maskOneCardUid(member.rfid_uid)}) — you are ready to check in.`;
           rfidStatusCard.className =
             "mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/35 dark:text-emerald-200";
           rfidRegisterRow.classList.add("hidden");
@@ -284,7 +285,7 @@
         }
 
         rfidStatusCard.textContent =
-          "RFID card not bound yet. Register one from here to finish setup.";
+          "OneCard not bound yet. Register it from here to finish setup.";
         rfidStatusCard.className =
           "mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100";
         rfidRegisterRow.classList.remove("hidden");

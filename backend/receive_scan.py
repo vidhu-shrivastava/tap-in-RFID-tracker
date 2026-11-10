@@ -5,20 +5,22 @@ Owner: branch-backend-core (Vidhu)
 
 WHAT THIS DOES
 --------------
-Listens for POST /scan with JSON { "uid": "A1B2C3D4" } (or { "scanned_uid": "..." }),
+Listens for POST /scan with:
+  - JSON { "uid": "04692602CD1590" } (or { "scanned_uid": "..." })
+  - or form-urlencoded uid=04692602CD1590 (Kathleen's earlier Arduino sketch)
 then calls the Supabase RPC handle_rfid_scan — the same function the admin UI and
 frontend helpers use. No Flask/Express; stdlib only so beginners can run it with
 `python3 receive_scan.py`.
 
-Phase 2 Auth (email/password in supabase.js) does NOT change this contract.
-Hardware still posts { "uid": "<HEX>" }; RLS stays open until taps are proven.
+UGA OneCard UIDs from the RC522 are typically 7-byte / 14 hex chars
+(e.g. 04692602CD1590). Hardware should POST continuous uppercase hex.
 
 SETUP
 -----
 1. cp .env.example .env
 2. Put the same SUPABASE_URL + SUPABASE_ANON_KEY as frontend/js/supabase.local.js
 3. python3 receive_scan.py
-4. curl -X POST http://127.0.0.1:8787/scan -H "Content-Type: application/json" -d '{"uid":"A1B2C3D4"}'
+4. curl -X POST http://127.0.0.1:8787/scan -H "Content-Type: application/json" -d '{"uid":"04692602CD1590"}'
 
 Later: deploy this file (or this folder) on the KTP UGA server and point the Arduino
 WiFi client at that host instead of 127.0.0.1.
@@ -32,6 +34,7 @@ import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs
 
 # ---------------------------------------------------------------------------
 # Config — load backend/.env if present (KEY=value lines, no quotes required)
@@ -74,12 +77,13 @@ def call_handle_rfid_scan(scanned_uid: str) -> tuple[int, dict]:
             "message": "Set SUPABASE_URL and SUPABASE_ANON_KEY in backend/.env",
         }
 
-    uid = scanned_uid.strip().upper()
+    # Match RPC / frontend: uppercase + strip spaces/colons/dashes from Serial copy-paste.
+    uid = "".join(ch for ch in scanned_uid.strip().upper() if ch not in " :.-")
     if not uid:
         return 400, {
             "success": False,
             "status": "invalid_uid",
-            "message": "RFID UID is empty.",
+            "message": "OneCard UID is empty.",
         }
 
     url = f"{SUPABASE_URL}/rest/v1/rpc/handle_rfid_scan"
@@ -157,19 +161,35 @@ class ScanHandler(BaseHTTPRequestHandler):
             return
 
         length = int(self.headers.get("Content-Length", "0") or 0)
-        raw = self.rfile.read(length) if length > 0 else b"{}"
-        try:
-            body = json.loads(raw.decode("utf-8") or "{}")
-        except json.JSONDecodeError:
-            self._send_json(400, {"success": False, "message": "Body must be JSON."})
-            return
+        raw = self.rfile.read(length) if length > 0 else b""
+        content_type = (self.headers.get("Content-Type") or "").lower()
+        uid = ""
 
-        if not isinstance(body, dict):
-            self._send_json(400, {"success": False, "message": "JSON body must be an object."})
-            return
+        if "application/x-www-form-urlencoded" in content_type:
+            # Kathleen's earlier sketch posted: uid=HEX
+            parsed = parse_qs(raw.decode("utf-8", errors="replace"), keep_blank_values=True)
+            values = parsed.get("uid") or parsed.get("scanned_uid") or [""]
+            uid = values[0] if values else ""
+        else:
+            try:
+                body = json.loads(raw.decode("utf-8") or "{}")
+            except json.JSONDecodeError:
+                self._send_json(
+                    400,
+                    {
+                        "success": False,
+                        "message": "Body must be JSON {\"uid\":\"...\"} or form uid=...",
+                    },
+                )
+                return
 
-        # Accept either key so Arduino / curl / admin-style callers all work.
-        uid = body.get("uid") or body.get("scanned_uid") or ""
+            if not isinstance(body, dict):
+                self._send_json(400, {"success": False, "message": "JSON body must be an object."})
+                return
+
+            # Accept either key so Arduino / curl / admin-style callers all work.
+            uid = body.get("uid") or body.get("scanned_uid") or ""
+
         if not isinstance(uid, str):
             self._send_json(400, {"success": False, "message": "uid must be a string."})
             return

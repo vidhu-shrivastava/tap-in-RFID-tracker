@@ -40,7 +40,8 @@ BEGIN
     );
   END IF;
 
-  scanned_uid := upper(btrim(scanned_uid));
+  -- Normalize OneCard / RC522 output: uppercase, strip spaces/colons/dashes.
+  scanned_uid := upper(regexp_replace(btrim(scanned_uid), '[\s:.\-]', '', 'g'));
 
   -- ----------------------------------------------------------
   -- 1) Look up member_id from members by rfid_uid

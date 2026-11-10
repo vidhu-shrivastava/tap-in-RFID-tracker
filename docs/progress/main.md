@@ -28,16 +28,16 @@
 
 ---
 
-## Status — DONE
+## Status — DONE (MVP) + OneCard follow-up on `main-temp`
 
-**MVP is complete on `main`.** Phase 1 (schema, scan RPC, UIs, cloud wiring) and Phase 2 (Auth, account-then-RFID, polished member/admin flows, hardware receive path) are merged and wired together.
+**MVP is complete on `main`.** Phase 1 + Phase 2 shipped. `main-temp` adds UGA OneCard readiness (`members.is_admin`, 14-hex UID normalize, Kathleen OLED/WiFi sketch → `/scan`).
 
 | What to know | Detail |
 |--------------|--------|
 | Entry page | `frontend/index.html` |
 | Auth | Email + password (`signUpWithPassword` / `signInWithPassword`) — no Google |
-| Admin | RFID UID contains `ADMIN` + chapter password in gitignored `admin.local.js` |
-| Secrets | Only in gitignored `supabase.local.js`, `admin.local.js`, `backend/.env` — never committed |
+| Admin | `members.is_admin` (legacy: UID contains `ADMIN`) + chapter password in gitignored `admin.local.js` |
+| Secrets | Anon URL/key may live in tracked `supabase.local.js`; keep `admin.local.js`, `backend/.env`, `arduino_secrets.h` gitignored |
 | Docs | Root `README.md` is the project home; this file is the integration log |
 
 **How a demo runs:** create/sign in → dashboard → bind RFID once if needed → (admin) open Admin from profile → activate event → simulate scan or `POST /scan` → points show on dashboard.
@@ -63,6 +63,14 @@
 - **2026-11-08 23:20** — Files: `README.md`, `docs/PROGRESS_TRACKER.md`, `docs/progress/main.md`, `docs/progress/backend-core.md`, `docs/progress/member-ui.md`, `docs/progress/db-onboarding.md`, `docs/progress/admin-analytics.md`, `docs/progress/hardware.md`, `docs/LOCAL_SUPABASE.md`, `database/README.md`.
   Built: Marked the project **officially DONE**; rewrote README + progress index for a finished MVP; added clear Status sections on every progress file; confirmed secret files stay gitignored / placeholder-only in examples.
   How it works: README is the public “what shipped + how to run” page; progress files keep historical AI logs but lead with a readable DONE summary so graders/teammates do not dig through weeks of bullets.
+
+- **2026-11-09 17:45** — Files: `hardware/tap_in_scanner/tap_in_scanner.ino`, `hardware/tap_in_scanner/arduino_secrets.h.example`, `database/phase3_onecard_admin.sql`, `database/schema.sql`, `database/rpc_handle_scan.sql`, `database/lead_explore_seed.sql`, `frontend/js/supabase.js`, `backend/receive_scan.py`, `frontend/register.html`, `frontend/dashboard.html`, `frontend/index.html`, `frontend/admin.html`, `docs/HARDWARE_TAP_PATH.md`, `README.md`, `database/README.md`, `docs/progress/main.md`.
+  Built: UGA OneCard readiness on `main-temp` — real 14-hex UIDs (`04692602CD1590`, `04B1BBDAAF1890`), `members.is_admin`, hardened UID normalize, OLED/WiFi sketch posting JSON `/scan`, receive path accepts JSON + form.
+  How it works: OneCards expose a 7-byte chip UID; bind/scan use continuous uppercase hex; admin is a DB flag because real UIDs cannot contain `ADMIN`; Kathleen’s sketch secrets stay in gitignored `arduino_secrets.h`.
+
+- **2026-11-09 18:30** — Files: `frontend/admin.html`, `database/lead_explore_seed.sql`, `database/phase3_onecard_member_uids.sql`, `database/README.md`, `docs/progress/main.md`.
+  Built: Admin OneCard copy (column + scan blurb), team OneCard UIDs (Vidhu stays `ADMIN001`), overlapping attendance/org-size bars with date-only X-axis, removed “Admin data loaded.”
+  How it works: Chart.js `grouped: false` stacks the solid attendance fill inside the org-size outline; cloud UID updates are in `phase3_onecard_member_uids.sql`.
 
 ### 2. Member Plain-English Summary (Written by Human Only)
 

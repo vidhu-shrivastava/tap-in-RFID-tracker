@@ -10,13 +10,15 @@
 --
 -- Paste this whole file into the Supabase SQL Editor (run once on a fresh project).
 
--- members: people who tap in with RFID cards
+-- members: people who tap in with UGA OneCards / RFID tags
 CREATE TABLE members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name text NOT NULL,
   email text UNIQUE NOT NULL,
   rfid_uid text UNIQUE NOT NULL,
-  total_points int4 NOT NULL DEFAULT 0
+  total_points int4 NOT NULL DEFAULT 0,
+  -- Admin is a column (not encoded in the card UID) so real OneCard hex UIDs work.
+  is_admin boolean NOT NULL DEFAULT false
 );
 
 -- events: meetings / activities that award points

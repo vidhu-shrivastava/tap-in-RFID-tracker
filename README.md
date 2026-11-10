@@ -1,11 +1,11 @@
 # Tap-In RFID Attendance Tracker
 
-**Status: DONE (MVP complete — Phase 1 + Phase 2)**
+**Status: DONE (MVP) + OneCard path on `main-temp`**
 
-University engineering-fraternity SWE project: members create an account, bind an RFID card once, tap in at events, and see attendance points on simple web dashboards. Execs manage events and analytics from a gated admin shell.
+University engineering-fraternity SWE project: members create an account, bind a **UGA OneCard** once, tap in at events, and see attendance points on simple web dashboards. Execs manage events and analytics from a gated admin shell.
 
 ```text
-Card → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_logs + points → dashboards
+OneCard → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_logs + points → dashboards
 ```
 
 ---
@@ -14,13 +14,13 @@ Card → RC522 → Arduino → POST /scan → handle_rfid_scan → attendance_lo
 
 | Area | Done |
 |------|------|
-| **Auth** | Email + password via Supabase Auth (no Google). Account first, RFID bind later. |
+| **Auth** | Email + password via Supabase Auth (no Google). Account first, OneCard bind later. |
 | **Member UI** | Sign-in / sign-up, dashboard (points + history), profile settings, theme toggle |
-| **RFID bind** | One-time bind from dashboard → `register.html`; CTA hides once bound |
-| **Admin** | Profile-menu Admin link only if member RFID contains `ADMIN`; chapter password gate; events + vertical attendance chart + simulate scan |
-| **Database** | `members`, `events`, `attendance_logs` + `handle_rfid_scan` RPC |
-| **Hardware receive** | `backend/receive_scan.py` accepts `POST /scan` so keys stay off firmware |
-| **Hardware sketch** | Arduino UNO R4 WiFi + RC522 UID read (Serial); WiFi tap path documented |
+| **OneCard bind** | One-time bind from dashboard → `register.html`; CTA hides once bound (14-hex UIDs like `04692602CD1590`) |
+| **Admin** | Profile-menu Admin when `members.is_admin` (legacy: UID contains `ADMIN`); chapter password gate; events + chart + simulate scan |
+| **Database** | `members`, `events`, `attendance_logs` + `handle_rfid_scan` + `phase3_onecard_admin.sql` |
+| **Hardware receive** | `backend/receive_scan.py` accepts `POST /scan` (JSON or form `uid=`) |
+| **Hardware sketch** | Arduino UNO R4 WiFi + RC522 + OLED; OneCard UID → JSON `/scan` |
 
 ---
 
@@ -103,6 +103,7 @@ cp backend/.env.example backend/.env
    2. `database/rpc_handle_scan.sql`
    3. `database/lead_explore_seed.sql`
    4. `database/phase2_nullable_rfid.sql`
+   5. `database/phase3_onecard_admin.sql` (OneCard-era `members.is_admin`)
 
 3. For local Auth demos: Supabase → Authentication → Providers → Email → disable **Confirm email**.
 
@@ -118,20 +119,20 @@ Open **http://localhost:5500/index.html**.
 | Flow | How |
 |------|-----|
 | Create account / sign in | `index.html` → `dashboard.html` |
-| Bind RFID (once) | Dashboard → Register RFID card → `register.html` |
+| Bind OneCard (once) | Dashboard → Register OneCard → `register.html` (paste Serial `UID Captured: …`) |
 | Member points / history | `dashboard.html` |
 | Profile cosmetics | `profile-settings.html` |
-| Admin | Signed-in member with RFID containing `ADMIN` → Account → Admin → chapter password |
+| Admin | Signed-in member with `is_admin` → Account → Admin → chapter password |
 | Simulate tap | Admin → enter UID → Run scan RPC |
 | Hardware receive | `cd backend && python3 receive_scan.py` — see [`docs/HARDWARE_TAP_PATH.md`](docs/HARDWARE_TAP_PATH.md) |
 
-**Admin rule:** a member is admin when `members.rfid_uid` contains `ADMIN` (case-insensitive). Seed example: `vidhu.shrivastava@uga.edu` / `ADMIN001`. Create a Supabase Auth account for that email (sign up once), then open Admin from the profile menu.
+**Admin rule:** a member is admin when `members.is_admin = true` (set by seed / SQL). Legacy UIDs containing `ADMIN` still count. Real OneCard hex UIDs cannot encode `ADMIN`, so run `phase3_onecard_admin.sql` before binding a real card to an admin account.
 
 ---
 
 ## Database (MVP)
 
-- **`members`** — `id`, `full_name`, `email`, `rfid_uid` (nullable until bound), `total_points`
+- **`members`** — `id`, `full_name`, `email`, `rfid_uid` (nullable until bound), `total_points`, `is_admin`
 - **`events`** — `id`, `event_name`, `event_date`, `point_value`, `is_active`, `is_archived`
 - **`attendance_logs`** — `id`, `member_id`, `event_id`, `scanned_at`
 - **RPC** — `handle_rfid_scan(scanned_uid)`
