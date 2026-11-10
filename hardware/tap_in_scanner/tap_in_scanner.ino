@@ -12,12 +12,15 @@
  *   04692602CD1590
  *   04B1BBDAAF1890
  *
- * SETUP
- * -----
- * 1. Copy arduino_secrets.h.example → arduino_secrets.h and fill WiFi + host.
- * 2. Libraries: MFRC522, Adafruit GFX, Adafruit SSD1306, WiFiS3 (R4 built-in).
- * 3. Run: cd backend && python3 receive_scan.py
- * 4. Open Serial Monitor at 9600 baud, tap a OneCard.
+ * SETUP (hotspot live check-in)
+ * -----------------------------
+ * 1. Copy arduino_secrets.h.example → arduino_secrets.h.
+ * 2. Put hotspot SSID/password in secrets. Set TAP_IN_HOST to the LAPTOP's
+ *    hotspot/LAN IP (e.g. 192.168.43.10) — NOT 127.0.0.1.
+ * 3. Libraries: MFRC522, Adafruit GFX, Adafruit SSD1306, WiFiS3 (R4 built-in).
+ * 4. On the laptop: cd backend && python3 receive_scan.py  (binds 0.0.0.0:8787).
+ * 5. USB = power + Serial Monitor (9600). Data path is WiFi POST /scan.
+ * 6. Activate one event in Admin, then tap a bound OneCard.
  *
  * See docs/HARDWARE_TAP_PATH.md for the full attendance path.
  */

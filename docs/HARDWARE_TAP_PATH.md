@@ -21,7 +21,7 @@ That string is what members bind on `register.html` and what hardware posts as `
 2. Make sure **exactly one** event is Active.
 3. Enter a registered UID (a bound OneCard like `04692602CD1590`, or seed demo UIDs) → **Run scan RPC**.
 
-Same RPC the hardware will call.
+Same RPC the hardware will call. This panel is a **no-Arduino fallback**, not the live scanner.
 
 ---
 
@@ -31,8 +31,11 @@ Thin Python server in this monorepo ([`backend/receive_scan.py`](../backend/rece
 
 ```bash
 cp backend/.env.example backend/.env   # same URL/anon key as frontend
-cd backend && python3 receive_scan.py  # http://127.0.0.1:8787
+# macOS only if HTTPS fails: python3 -m pip install certifi
+cd backend && python3 receive_scan.py  # default http://0.0.0.0:8787
 ```
+
+Default bind is **`0.0.0.0:8787`** so devices on the same hotspot/LAN can POST. Laptop curl still uses `127.0.0.1`; the Arduino must use the **laptop’s hotspot IP**.
 
 Arduino (or curl) posts JSON:
 
@@ -45,6 +48,23 @@ curl -s -X POST http://127.0.0.1:8787/scan \
 Also accepts form-urlencoded `uid=04692602CD1590` for older Arduino sketches.
 
 **Why this folder exists:** on the fraternity server you can host `backend/` as one URL. The sketch only needs that host; secrets stay in `backend/.env` on the server, not burned into firmware.
+
+### Hotspot live-check-in checklist (USB ≠ data path)
+
+Live taps do **not** go through the Admin form or USB Serial. Flow:
+
+```text
+OneCard → RC522 → Arduino WiFi → POST http://<LAPTOP_HOTSPOT_IP>:8787/scan → handle_rfid_scan
+```
+
+1. **Same WiFi:** phone or laptop hotspot; join **laptop** and **Arduino UNO R4 WiFi**.
+2. **USB:** powers the board and opens Serial Monitor (9600) for debug only.
+3. **Receive server:** `cd backend && python3 receive_scan.py` — note the guessed LAN IP it prints.
+4. **Secrets:** copy `arduino_secrets.h.example` → gitignored `arduino_secrets.h`. Set hotspot SSID/password and `TAP_IN_HOST` to that laptop IP (example `192.168.43.10`). **Never** `127.0.0.1` on the board.
+5. **Data ready:** member has that OneCard UID bound; exactly one event Active in Admin.
+6. **Tap:** OLED feedback + Serial log; dashboard shows attendance + points.
+7. **Double-tap:** expect `already_checked_in`.
+8. **No hardware tonight?** Path A Admin simulate still proves the same RPC.
 
 ---
 
@@ -84,7 +104,8 @@ WiFi / host settings live in gitignored `arduino_secrets.h` (copy from `arduino_
 2. Member exists with that `rfid_uid` (`register.html` bind step, dashboard helper, or seed).
 3. Exactly one `events.is_active = true` (Admin → Activate).
 4. Frontend / backend `.env` / `supabase.local.js` point at the **same cloud** Supabase project (`https://….supabase.co` — no Docker).
-5. Double-tap same event returns `already_checked_in` (expected).
+5. Receive server binds `0.0.0.0:8787`; Arduino `TAP_IN_HOST` = laptop hotspot IP (not `127.0.0.1`).
+6. Double-tap same event returns `already_checked_in` (expected).
 
 ---
 
@@ -94,10 +115,10 @@ WiFi / host settings live in gitignored `arduino_secrets.h` (copy from `arduino_
 2. **Keys:** `frontend/js/supabase.local.js` + `backend/.env` + `frontend/js/admin.local.js` point at the same project
 3. **Auth demo (optional):** disable Confirm email in Supabase Auth; create account, then bind OneCard UID from Serial
 4. **Activate event:** `admin.html` → Chapter admin password → Activate one event
-5. **Simulate tap:** Admin “Run scan RPC” with the bound UID **or**  
+5. **Prove RPC without Arduino:** Admin “Simulate OneCard scan” **or**  
    `curl -s -X POST http://127.0.0.1:8787/scan -H "Content-Type: application/json" -d '{"uid":"04692602CD1590"}'`  
-   (`cd backend && python3 receive_scan.py` first)
+   (`cd backend && python3 receive_scan.py` first — listens on `0.0.0.0:8787`)
 6. **Verify points:** `dashboard.html` for that member shows `total_points` + attendance row
-7. **Live hardware:** Arduino POSTs `{ "uid": "<HEX>" }` to `/scan`
+7. **Live hardware (hotspot):** same SSID for laptop + Arduino; USB = power/Serial only; secrets `TAP_IN_HOST` = laptop LAN IP; board POSTs `{ "uid": "<HEX>" }` to `/scan`
 
 **Contract (do not change without telling Kathleen):** `POST /scan` JSON `{ "uid": "<HEX>" }` (also accepts `scanned_uid`, and form `uid=`).

@@ -52,6 +52,10 @@ See root `README.md`.
   Built: Marked Hardware log **DONE** for MVP (Serial UID + documented WiFi/`POST /scan` path).
   How it works: Status banner separates shipped MVP from optional OLED/buzzer follow-ups.
 
+- **2026-11-10 11:00** — Files: `hardware/tap_in_scanner/arduino_secrets.h.example`, `hardware/tap_in_scanner/tap_in_scanner.ino`, `docs/progress/hardware.md`.
+  Built: Hotspot live-check-in secrets/setup comments — `TAP_IN_HOST` example is a laptop LAN IP (not `127.0.0.1`); sketch header documents USB = power/Serial, WiFi POST `/scan` = attendance path.
+  How it works: board joins the hotspot SSID, POSTs to the laptop IP printed by `receive_scan.py`, same contract `{ "uid": "<HEX>" }` Kathleen already ships.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

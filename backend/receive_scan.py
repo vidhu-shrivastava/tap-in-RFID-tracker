@@ -20,16 +20,21 @@ SETUP
 1. cp .env.example .env
 2. Put the same SUPABASE_URL + SUPABASE_ANON_KEY as frontend/js/supabase.local.js
 3. python3 receive_scan.py
+   Default bind is 0.0.0.0:8787 so an Arduino on the same hotspot can reach
+   this laptop. Point arduino_secrets.h TAP_IN_HOST at the laptop's hotspot IP
+   (not 127.0.0.1 — that only works on the laptop itself).
 4. curl -X POST http://127.0.0.1:8787/scan -H "Content-Type: application/json" -d '{"uid":"04692602CD1590"}'
 
 Later: deploy this file (or this folder) on the KTP UGA server and point the Arduino
-WiFi client at that host instead of 127.0.0.1.
+WiFi client at that host instead of the laptop LAN IP.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import socket
+import ssl
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -39,9 +44,6 @@ from urllib.parse import parse_qs
 # ---------------------------------------------------------------------------
 # Config — load backend/.env if present (KEY=value lines, no quotes required)
 # ---------------------------------------------------------------------------
-
-HOST = os.environ.get("TAP_IN_HOST", "127.0.0.1")
-PORT = int(os.environ.get("TAP_IN_PORT", "8787"))
 
 
 def load_dotenv(path: Path) -> None:
@@ -60,10 +62,46 @@ def load_dotenv(path: Path) -> None:
             os.environ[key] = value
 
 
+# Load .env BEFORE reading HOST/PORT so TAP_IN_HOST in .env actually applies.
 load_dotenv(Path(__file__).resolve().parent / ".env")
+
+# 0.0.0.0 = all interfaces — required for phone/laptop hotspot demos where the
+# Arduino is a separate WiFi client. Override with TAP_IN_HOST=127.0.0.1 for
+# laptop-only curl tests if you want.
+HOST = os.environ.get("TAP_IN_HOST", "0.0.0.0")
+PORT = int(os.environ.get("TAP_IN_PORT", "8787"))
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+
+
+def guess_lan_ip() -> str:
+    """Best-effort laptop LAN IP so Serial/setup docs can show what Arduino should use."""
+    try:
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        probe.settimeout(1.0)
+        # UDP connect does not send packets; it only selects a local route/IP.
+        probe.connect(("8.8.8.8", 80))
+        ip = probe.getsockname()[0]
+        probe.close()
+        return ip
+    except OSError:
+        return "YOUR_LAPTOP_HOTSPOT_IP"
+
+
+def https_context() -> ssl.SSLContext:
+    """
+    Build an SSL context that works on macOS Python.org installs.
+
+    Those builds often ship without a CA bundle (CERTIFICATE_VERIFY_FAILED).
+    Prefer certifi when installed:  python3 -m pip install certifi
+    """
+    try:
+        import certifi  # optional; keeps receive_scan usable without a venv otherwise
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
 
 
 def call_handle_rfid_scan(scanned_uid: str) -> tuple[int, dict]:
@@ -100,7 +138,7 @@ def call_handle_rfid_scan(scanned_uid: str) -> tuple[int, dict]:
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with urllib.request.urlopen(request, timeout=15, context=https_context()) as response:
             body = response.read().decode("utf-8")
             data = json.loads(body) if body else {}
             return response.status, data if isinstance(data, dict) else {"data": data}
@@ -215,8 +253,15 @@ def main() -> None:
         )
 
     server = ThreadingHTTPServer((HOST, PORT), ScanHandler)
+    lan_ip = guess_lan_ip()
     print(f"[tap-in receive] Listening on http://{HOST}:{PORT}")
     print("[tap-in receive] POST /scan  GET /health")
+    print(f"[tap-in receive] Laptop curl:   http://127.0.0.1:{PORT}/scan")
+    if HOST in ("0.0.0.0", "::"):
+        print(
+            f"[tap-in receive] Arduino host:  set TAP_IN_HOST to this laptop's "
+            f"hotspot IP (guessed {lan_ip}) — never 127.0.0.1 from the board."
+        )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

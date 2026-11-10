@@ -310,11 +310,14 @@
           class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800 dark:bg-slate-900"
         >
           <h2 id="scan-heading" class="text-xl font-semibold">
-            Test OneCard scan
+            Simulate OneCard scan
           </h2>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Simulates a OneCard tap through the same check-in path the Arduino
-            uses (active event → attendance + points).
+            No-Arduino fallback: types a UID into the same
+            <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">handle_rfid_scan</code>
+            RPC live hardware hits via
+            <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">POST /scan</code>
+            (active event → attendance + points). USB Serial is not this path.
           </p>
           <form
             id="scan-form"

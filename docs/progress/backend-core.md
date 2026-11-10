@@ -94,6 +94,10 @@ See root `README.md` and `docs/progress/main.md` for the final project summary.
   Built: Marked this branch log **DONE** with a top Status summary after merge into `main`.
   How it works: historical AI bullets stay; Status section is the quick read for “what backend shipped.”
 
+- **2026-11-10 11:00** — Files: `backend/receive_scan.py`, `backend/.env.example`, `backend/README.md`, `docs/HARDWARE_TAP_PATH.md`, `frontend/admin.html`, `docs/progress/backend-core.md`.
+  Built: Hotspot-ready live check-in Path B — receive server defaults to `0.0.0.0:8787` (`.env` applied before bind), prints guessed laptop LAN IP for Arduino `TAP_IN_HOST`, optional `certifi` SSL context for macOS HTTPS, Admin copy clarified as simulate-only fallback, hotspot demo checklist in hardware tap docs.
+  How it works: Arduino on the same hotspot POSTs `{ "uid": "<HEX>" }` to the laptop LAN IP; USB is power/Serial only; proven with curl `checked_in` then `already_checked_in` against the same `handle_rfid_scan` RPC Admin uses.
+
 ### 2. Member Plain-English Summary (Written by Human Only)
 
 <!-- HUMAN ONLY — AI must NEVER write this section. -->

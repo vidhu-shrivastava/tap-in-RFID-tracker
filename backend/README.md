@@ -19,14 +19,18 @@ cp backend/.env.example backend/.env
 # edit backend/.env
 ```
 
-2. Run the receiver (stdlib only — no pip install):
+2. Run the receiver (stdlib HTTP — no Flask). On macOS Python.org builds, install CA certs once if HTTPS to Supabase fails:
 
 ```bash
+python3 -m pip install certifi   # only if you see CERTIFICATE_VERIFY_FAILED
 cd backend
 python3 receive_scan.py
 ```
 
-Default listen: **http://127.0.0.1:8787**
+Default listen: **http://0.0.0.0:8787** (all interfaces — required for hotspot demos).
+
+- Laptop smoke-test still uses `http://127.0.0.1:8787`.
+- Arduino must use the **laptop’s hotspot/LAN IP** in `arduino_secrets.h` (e.g. `192.168.43.10`), **not** `127.0.0.1`.
 
 3. Smoke-test without hardware:
 
@@ -37,6 +41,15 @@ curl -s -X POST http://127.0.0.1:8787/scan \
 ```
 
 You need an **active event** and a registered member with that RFID UID (use Admin or seed data).
+
+### Hotspot demo (USB ≠ data path)
+
+1. Phone or laptop hotspot: put **laptop** and **Arduino UNO R4 WiFi** on the same SSID.
+2. USB cable powers the board and opens Serial Monitor for debug only — check-ins go over **WiFi HTTP**, not Serial.
+3. `cd backend && python3 receive_scan.py` (prints a guessed LAN IP for `TAP_IN_HOST`).
+4. In gitignored `arduino_secrets.h`: hotspot SSID/password + that laptop IP + port `8787`.
+5. Activate one event in Admin → tap OneCard → confirm points on the member dashboard.
+6. No Arduino? Admin **Simulate OneCard scan** still hits the same `handle_rfid_scan` RPC.
 
 ## Endpoints
 
